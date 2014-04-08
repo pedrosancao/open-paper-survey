@@ -37,7 +37,7 @@ include_once(dirname(__FILE__).'/../config.inc.php');
 function int_divide($x, $y) {
     if ($x == 0) return 0;
     if ($y == 0) return FALSE;
-    return ($x - ($x % $y)) / $y;
+    return (int) floor($x / $y);
 }
 
 function keytoindex($a)
@@ -129,13 +129,13 @@ function offset($image, $a, $compare, $coordinates) {
 		vertlinex($coordinates['TL_VERT_TLX'],$coordinates['TL_VERT_TLY'],$coordinates['TL_VERT_BRX'],$coordinates['TL_VERT_BRY'],$image,$coordinates['VERT_WIDTH']),
 		horiliney($coordinates['TL_HORI_TLX'],$coordinates['TL_HORI_TLY'],$coordinates['TL_HORI_BRX'],$coordinates['TL_HORI_BRY'],$image,$coordinates['HORI_WIDTH']),
 
-		vertlinex($coordinates['TR_VERT_TLX'],$coordinates['TR_VERT_TLY'],$coordinates['TR_VERT_BRX'],$coordinates['TR_VERT_BRY'],$image,$coordinates['VERT_WIDTH']),
+		vertlinex($coordinates['TR_VERT_TLX'],$coordinates['TR_VERT_TLY'],$coordinates['TR_VERT_BRX'],$coordinates['TR_VERT_BRY'],$image,$coordinates['VERT_WIDTH'],'rtl'),
 		horiliney($coordinates['TR_HORI_TLX'],$coordinates['TR_HORI_TLY'],$coordinates['TR_HORI_BRX'],$coordinates['TR_HORI_BRY'],$image,$coordinates['HORI_WIDTH']),
 
 		vertlinex($coordinates['BL_VERT_TLX'],$coordinates['BL_VERT_TLY'],$coordinates['BL_VERT_BRX'],$coordinates['BL_VERT_BRY'],$image,$coordinates['VERT_WIDTH']),
 		horiliney($coordinates['BL_HORI_TLX'],$coordinates['BL_HORI_TLY'],$coordinates['BL_HORI_BRX'],$coordinates['BL_HORI_BRY'],$image,$coordinates['HORI_WIDTH']),
 
-		vertlinex($coordinates['BR_VERT_TLX'],$coordinates['BR_VERT_TLY'],$coordinates['BR_VERT_BRX'],$coordinates['BR_VERT_BRY'],$image,$coordinates['VERT_WIDTH']),
+		vertlinex($coordinates['BR_VERT_TLX'],$coordinates['BR_VERT_TLY'],$coordinates['BR_VERT_BRX'],$coordinates['BR_VERT_BRY'],$image,$coordinates['VERT_WIDTH'],'rtl'),
 		horiliney($coordinates['BR_HORI_TLX'],$coordinates['BR_HORI_TLY'],$coordinates['BR_HORI_BRX'],$coordinates['BR_HORI_BRY'],$image,$coordinates['HORI_WIDTH']),
 	);
 
@@ -547,67 +547,52 @@ function horiliney($tlx,$tly,$brx,$bry,$image,$approxw)
  * @param int $tly
  * @param int $brx
  * @param int $bry
- * @param type $image
- * @param int $approxw
+ * @param resrouce $image
+ * @param int $lineWidth
+ * @param string $direction
  * @return boolean
  */
-function vertlinex($tlx, $tly, $brx, $bry, $image, $approxw) {
-	//0 is black, 1 is white
-	$x = 0;
+function vertlinex($tlx, $tly, $brx, $bry, $image, $lineWidth, $direction = 'ltr') {
 	//try 10 times to find start of line
-	$yadd = int_divide(($bry - $tly), 10);
-	$s = array();
-	$count = 0;
-	$avg = 0;
-	$tolerance = int_divide($approxw, 3);
-	for ($y = $tly; $y < $bry; $y+=$yadd) {
-		$col = imagecolorat($image, $x, $y);
+	$increment = int_divide(($bry - $tly), 10);
+	$foundCount = array();
+	$tolerance = int_divide($lineWidth, 3);
+	// lines loop
+	for ($y = $tly; $y < $bry; $y += $increment) {
+		//0 is black, 1 is white
+		$col = 1;
 		$width = 0;
-		$start = $x;
+		$start = $tlx;
+		// iterate line, if find black pixels sequence count the X coordinate
 		for ($x = $tlx; $x < $brx; $x++) {
 			$rgb = imagecolorat($image, $x, $y);
 			if ($rgb != $col){
-				if ($width >= $approxw - $tolerance && $width <= $approxw + $tolerance && $col == 0){
-					$s[$start + int_divide($width, 2)] = $y;
-					$count++;
-					$avg += $start;
+				if ($col == 0 && $width >= $lineWidth - $tolerance && $width <= $lineWidth + $tolerance) {
+					$found = $start + int_divide($width, 2);
+					if (!array_key_exists($found, $foundCount)) {
+						$foundCount[$found] = 1;
+					} else {
+						$foundCount[$found]++;
+					}
 				}
 				$width = 0;
 				$col = $rgb;
 				$start = $x;
 			}
 			$width++;
-			//print $rgb;
 		}
-		//print "<br/>\n";
 	}
 
 	//add ability to search for the line closest to a certain length - not just the longest which
 	//may be a page artifact. need to define CORNER_LINE_LENGTH in pixels and enablels
 
-
-	$line = 0;
-	$longest = key($s);
-	foreach($s as $x => $yval) {
-		$col = imagecolorat($image, $x, $tly);
-		$width = 0;
-		for($y = $tly; $y < $bry; $y += 1) {
-			$rgb = imagecolorat($image, $x, $y);
-			if ($rgb != $col) {
-				//print "X LINE: $x width: $width COL: $col<br/>";
-				if ($width > $line && $col == 0) {
-					$longest= $x;
-					$line = $width;
-				}
-				$width = 0;
-				$col = $rgb;
-			}
-		-	$width++;
-		}
-
+	// return the highest/lowest X (key) where count (value) is the highest
+	if ($direction === 'rtl') {
+		krsort($foundCount);
+	} else {
+		ksort($foundCount);
 	}
-
-	return $longest;
+	return array_search(max($foundCount), $foundCount);
 }
 
 function overlay($image, $boxes)
