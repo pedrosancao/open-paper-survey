@@ -1,4 +1,4 @@
-<? 
+<?php
 
 /*	Copyright Deakin University 2007,2008
  *	Written by Adam Zammit - adam.zammit@deakin.edu.au
@@ -29,8 +29,7 @@ include_once(dirname(__FILE__).'/../config.inc.php');
 /* Given a 1 bit image containing a barcode
  * Return an array of bar widths
  */
-function barWidth($image,$scany)
-{
+function barWidth($image, $scany) {
 	$xdim = imagesx($image);
 	$b = array();
 	$count = 0;
@@ -57,14 +56,12 @@ function barWidth($image,$scany)
 /* Given an array of widths, return the guess of
  * the width of narrow and wide bars
  */
-function nwWidth($array)
-{
+function nwWidth($array) {
 	$a = array();
 	sort($array);
 	$elements = count($array);
 
-	if ($elements <= 1)
-	{
+	if ($elements <= 1) {
 		$a['n'] = 0;
 		$a['w'] = 0;
 		return $a;
@@ -224,8 +221,7 @@ function validateCodaBar($s)
  * Currently steps pixel by pixel (step = 1)
  *
  */
-function barcode($image, $step = 1, $length = false)
-{
+function barcode($image, $step = 1, $length = false) {
 	if (function_exists('imagefilter') &&
 		function_exists('imagetruecolortopalette') &&
 		function_exists('imagecolorset') &&
@@ -244,8 +240,7 @@ function barcode($image, $step = 1, $length = false)
 
 	$height = imagesy($image);
 
-	for ($i = ($step); $i < $height - ($step); $i += ($step))
-	{
+	for ($i = ($step); $i < $height - ($step); $i += ($step)) {
 		$a = barWidth($image,$i);
 		$w = nwWidth($a);
 		if ($w['n'] != 0 && $w['w'] != 0){

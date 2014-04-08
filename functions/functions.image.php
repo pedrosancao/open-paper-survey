@@ -1,4 +1,4 @@
-<?
+<?php
 
 /*	Copyright Deakin University 2007,2008
  *	Written by Adam Zammit - adam.zammit@deakin.edu.au
@@ -197,34 +197,32 @@ function calcoffset($a,$ox=0,$oy=0)
  * @author Adam Zammit <adam.zammit@acspri.org.au>
  * @since  2011-08-26
  */
-function sanitizepage($page,$width,$height)
-{
+function sanitizepage($page, $width, $height) {
 	$tb = array('t','b');
 	$lr = array('l','r');
 	$vh = array('vert','hori');
 	$ex = array('tlx','brx');
 	$ey = array('tly','bry');
-	foreach($tb as $a)
-		foreach($lr as $b)
-			foreach($vh as $c)					
-			{
+	foreach($tb as $a) {
+		foreach($lr as $b) {
+			foreach($vh as $c) {
 				$vname = "$a$b" . "_" . $c ."_";
-			
-				foreach($ex as $d)
-				{
+
+				foreach($ex as $d) {
 					$vn = strtoupper($vname . $d);
-					if ($page[$vn] <= 0) $val = 1;
+					if ($page[$vn] <= 0) $page[$vn] = 1;
 					if ($page[$vn] >= $width) $page[$vn] = $width - 1;
 				}
 
-				foreach($ey as $d)
-				{
+				foreach($ey as $d) {
 					$vn = strtoupper($vname . $d);
 					if ($page[$vn] <= 0) $page[$vn] = 1;
 					if ($page[$vn] >= $height) $page[$vn] = $height - 1;
 				}
 
 			}
+		}
+	}
 	return $page;
 }
 

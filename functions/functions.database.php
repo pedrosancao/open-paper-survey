@@ -1,4 +1,4 @@
-<?
+<?php
 
 /*	Copyright Deakin University 2007,2008
  *	Written by Adam Zammit - adam.zammit@deakin.edu.au
@@ -23,15 +23,13 @@
  */
 
 
-
 include_once(dirname(__FILE__).'/../config.inc.php');
 include_once(dirname(__FILE__).'/../db.inc.php');
 
 /* Sort box groups by pageid then box tly tlx
  *
  */
-function sort_order_pageid_box($qid)
-{
+function sort_order_pageid_box($qid) {
 	global $db;
 
 
@@ -66,8 +64,7 @@ function sort_order_pageid_box($qid)
 /* Sort box groups by their variable name
  *
  */
-function sort_order_varname($qid)
-{
+function sort_order_varname($qid) {
 	global $db;
 
 
@@ -97,13 +94,10 @@ function sort_order_varname($qid)
 
 }
 
-
 /*
  * Assign the next free form to a verifier
  */
-
-function assign_to($vid)
-{
+function assign_to($vid) {
 	global $db;
 
 	$db->StartTrans();
@@ -125,27 +119,22 @@ function assign_to($vid)
 
 	$rs = $db->GetAll($sql);
 
-	if (!empty($rs))
-	{
-		if (count($rs) == 1)
-		{
+	if (!empty($rs)) {
+		if (count($rs) == 1) {
 			return $rs[0]['fid'];
 		}
-		else if (count($rs) > 1)
-		{
+		elseif (count($rs) > 1) {
 			print T_("ERROR: Multiple forms assigned, please see a technical officer");
 			exit();
 		}
 	}
 
-
 	//only get forms that are assigned to this verifier
-
 	$sql = "SELECT f.fid AS fid
 		FROM forms AS f
 		JOIN verifierquestionnaire AS v ON (v.vid = '$vid' AND f.qid = v.qid) ";
 
-	if (!MISSING_PAGE_ASSIGN){
+	if (!MISSING_PAGE_ASSIGN) {
 		$sql .= " LEFT JOIN missingpages AS m ON (f.fid = m.fid) ";
 	}
 
@@ -156,8 +145,7 @@ function assign_to($vid)
 		$sql .= " AND m.fid IS NULL ";
 	}
 
-	if (!VERIFY_WITH_MISSING_PAGES)
-	{
+	if (!VERIFY_WITH_MISSING_PAGES) {
 		$sql .= "AND NOT EXISTS(
 				SELECT p.pid
 				FROM pages AS p
@@ -177,8 +165,7 @@ function assign_to($vid)
 
 	$fid = false;
 
-	if (!empty($rs))
-	{
+	if (!empty($rs)) {
 		$fid = $rs['fid'];
 		
 		$sql = "UPDATE verifiers
@@ -195,13 +182,9 @@ function assign_to($vid)
 	$db->CompleteTrans();
 
 	return $fid;
-
 }
 
-
-
-function assign_to_merge($vid)
-{
+function assign_to_merge($vid) {
 	global $db;
 
 	$db->StartTrans();
@@ -229,11 +212,7 @@ function assign_to_merge($vid)
 
 }
 
-
-
-
-function get_vid()
-{
+function get_vid() {
 	global $db;
 
 	$sql = "SELECT vid
@@ -242,22 +221,16 @@ function get_vid()
 
 	$rs = $db->GetRow($sql);
 
-	if (empty($rs))
+	if (empty($rs)) {
 		return false;//invalid user
-	else
-	{
+	}
+	else {
 		return $rs['vid'];
 	}
-
-
 }
 
-
-function get_fid($vid = "")
-{
+function get_fid($vid = "") {
 	global $db;
-
-	$sql ="";
 
 	$sql = "SELECT fid
 		FROM forms
@@ -266,15 +239,13 @@ function get_fid($vid = "")
 
 	$rs = $db->GetRow($sql);
 
-	if (empty($rs))
+	if (empty($rs)) {
 		return false;//invalid user
-	else
-	{
-		if (empty($rs['fid']))
-		{
+	}
+	else {
+		if (empty($rs['fid'])) {
 			//assign a form
-		}else
-		{
+		} else {
 			return $rs['fid'];
 		}
 	}
@@ -282,9 +253,7 @@ function get_fid($vid = "")
 
 }
 
-
-function detect_differences()
-{
+function detect_differences() {
 	global $db;
 
 	$sql = "SELECT fid
@@ -337,10 +306,7 @@ function detect_differences()
 
 }
 
-
-
-function get_qid_description($fid)
-{
+function get_qid_description($fid) {
 	global $db;
 
 	$sql = "SELECT qid,description
@@ -351,7 +317,3 @@ function get_qid_description($fid)
 
 	return $rs;
 }
-
-
-
-?>

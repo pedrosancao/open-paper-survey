@@ -1,4 +1,4 @@
-<?
+<?php
 
 /*	Copyright Deakin University 2007,2008
  *	Written by Adam Zammit - adam.zammit@deakin.edu.au
@@ -33,12 +33,12 @@
  *
  */
 
-define('DB_USER', 'quexf');
-define('DB_PASS', 'quexf');
-define('DB_HOST', 'database.dcarf');
-define('DB_NAME', 'quexf');
+define('DB_USER', 'test');
+define('DB_PASS', 'test');
+define('DB_HOST', 'localhost');
+define('DB_NAME', 'test');
 
-define('ADODB_DIR', '/usr/share/php/adodb/');
+define('ADODB_DIR', dirname(__FILE__) . '/include/adodb5/');
 
 define('BLANK_PAGE_DETECTION', true);
 

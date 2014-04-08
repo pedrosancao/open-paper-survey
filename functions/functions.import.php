@@ -1,4 +1,4 @@
-<?
+<?php
 
 /*	Copyright Deakin University 2007,2008
  *	Written by Adam Zammit - adam.zammit@deakin.edu.au
@@ -202,9 +202,8 @@ function newquestionnaire($filename,$desc = "",$type="pngmono"){
 			//imagepng($barcode,"/mnt/iss/tmp/temp$n.png");
 
 			//check for barcode
-			$pid = barcode($barcode,1,BARCODE_LENGTH_PID);
-			if ($pid)
-			{
+			$pid = barcode($barcode, 1, BARCODE_LENGTH_PID);
+			if ($pid) {
 				$pages++;
 				print T_("BARCODE") . ": $pid";
 
@@ -242,9 +241,9 @@ function newquestionnaire($filename,$desc = "",$type="pngmono"){
 				//	break 2;
 				//}
 	
-			}
-			else
+			} else {
 				print T_("INVALID - IGNORING BLANK PAGE");
+			}
 
 			unset($data);
 			unset($image);
