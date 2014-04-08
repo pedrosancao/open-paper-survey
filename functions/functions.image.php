@@ -109,59 +109,61 @@ function is_blank_page($image,$page)
 
 
 
-//calculate the offset of an image given DCARF standard corner lines
-//and original page id
-//given an image and the tlx,tly,trx,try,blx,bly,brx,bry as an array
-//
-function offset($image,$a,$compare = 1,$page)
-{
-	$b = array();
-	$c = array();
-
+/**
+ * calculate the offset of corner lines given an image and the
+ * top-left, top-right, bottom-left and bottom-right detection areas coordinates
+ * 
+ * @param resource $image of type gd
+ * @param mixed $a
+ * @param boolean $compare
+ * @param array $coordinates Questionnaire's page data
+ * @return array|boolean
+ */
+function offset($image, $a, $compare, $coordinates) {
 	//temp only ?
-	if (!isset($a['tlx']) && $compare == 1)
-	{
-		$c[0] = 0;
-		$c[1] = 0;
-		return $c;
+	if (!isset($a['tlx']) && $compare == 1) {
+		return array(0, 0);
 	}
 
-	$b[] = vertlinex($page['TL_VERT_TLX'],$page['TL_VERT_TLY'],$page['TL_VERT_BRX'],$page['TL_VERT_BRY'],$image,$page['VERT_WIDTH']);
-	$b[] = horiliney($page['TL_HORI_TLX'],$page['TL_HORI_TLY'],$page['TL_HORI_BRX'],$page['TL_HORI_BRY'],$image,$page['HORI_WIDTH']);
+	$offset = array(
+		vertlinex($coordinates['TL_VERT_TLX'],$coordinates['TL_VERT_TLY'],$coordinates['TL_VERT_BRX'],$coordinates['TL_VERT_BRY'],$image,$coordinates['VERT_WIDTH']),
+		horiliney($coordinates['TL_HORI_TLX'],$coordinates['TL_HORI_TLY'],$coordinates['TL_HORI_BRX'],$coordinates['TL_HORI_BRY'],$image,$coordinates['HORI_WIDTH']),
 
-	$b[] = vertlinex($page['TR_VERT_TLX'],$page['TR_VERT_TLY'],$page['TR_VERT_BRX'],$page['TR_VERT_BRY'],$image,$page['VERT_WIDTH']);
-	$b[] = horiliney($page['TR_HORI_TLX'],$page['TR_HORI_TLY'],$page['TR_HORI_BRX'],$page['TR_HORI_BRY'],$image,$page['HORI_WIDTH']);
+		vertlinex($coordinates['TR_VERT_TLX'],$coordinates['TR_VERT_TLY'],$coordinates['TR_VERT_BRX'],$coordinates['TR_VERT_BRY'],$image,$coordinates['VERT_WIDTH']),
+		horiliney($coordinates['TR_HORI_TLX'],$coordinates['TR_HORI_TLY'],$coordinates['TR_HORI_BRX'],$coordinates['TR_HORI_BRY'],$image,$coordinates['HORI_WIDTH']),
 
-	$b[] = vertlinex($page['BL_VERT_TLX'],$page['BL_VERT_TLY'],$page['BL_VERT_BRX'],$page['BL_VERT_BRY'],$image,$page['VERT_WIDTH']);
-	$b[] = horiliney($page['BL_HORI_TLX'],$page['BL_HORI_TLY'],$page['BL_HORI_BRX'],$page['BL_HORI_BRY'],$image,$page['HORI_WIDTH']);
+		vertlinex($coordinates['BL_VERT_TLX'],$coordinates['BL_VERT_TLY'],$coordinates['BL_VERT_BRX'],$coordinates['BL_VERT_BRY'],$image,$coordinates['VERT_WIDTH']),
+		horiliney($coordinates['BL_HORI_TLX'],$coordinates['BL_HORI_TLY'],$coordinates['BL_HORI_BRX'],$coordinates['BL_HORI_BRY'],$image,$coordinates['HORI_WIDTH']),
 
-	$b[] = vertlinex($page['BR_VERT_TLX'],$page['BR_VERT_TLY'],$page['BR_VERT_BRX'],$page['BR_VERT_BRY'],$image,$page['VERT_WIDTH']);
-	$b[] = horiliney($page['BR_HORI_TLX'],$page['BR_HORI_TLY'],$page['BR_HORI_BRX'],$page['BR_HORI_BRY'],$image,$page['HORI_WIDTH']);
+		vertlinex($coordinates['BR_VERT_TLX'],$coordinates['BR_VERT_TLY'],$coordinates['BR_VERT_BRX'],$coordinates['BR_VERT_BRY'],$image,$coordinates['VERT_WIDTH']),
+		horiliney($coordinates['BR_HORI_TLX'],$coordinates['BR_HORI_TLY'],$coordinates['BR_HORI_BRX'],$coordinates['BR_HORI_BRY'],$image,$coordinates['HORI_WIDTH']),
+	);
 
+	if (!$compare) {
+		return $offset;
+	}
 
-	if ($compare == 0) return $b;
-
-	$xa =0;
+	$xa = 0;
 	$xb = 0;
 	$xc = 0;
-	$ya =0;
+	$ya = 0;
 	$yb = 0;
 	$yc = 0;
 
-	if ($b[0] != 0){ $xa += $a['tlx']; $xb += $b[0]; $xc++; } else return false;
-	if ($b[2] != 0){ $xa += $a['trx']; $xb += $b[2]; $xc++; } else return false;
-	if ($b[4] != 0){ $xa += $a['blx']; $xb += $b[4]; $xc++; } else return false;
-	if ($b[6] != 0){ $xa += $a['brx']; $xb += $b[6]; $xc++; } else return false;
+	if ($offset[0] != 0){ $xa += $a['tlx']; $xb += $offset[0]; $xc++; } else return false;
+	if ($offset[2] != 0){ $xa += $a['trx']; $xb += $offset[2]; $xc++; } else return false;
+	if ($offset[4] != 0){ $xa += $a['blx']; $xb += $offset[4]; $xc++; } else return false;
+	if ($offset[6] != 0){ $xa += $a['brx']; $xb += $offset[6]; $xc++; } else return false;
 
-	if ($b[1] != 0){ $ya += $a['tly']; $yb += $b[1]; $yc++; } else return false;
-	if ($b[3] != 0){ $ya += $a['try']; $yb += $b[3]; $yc++; } else return false;
-	if ($b[5] != 0){ $ya += $a['bly']; $yb += $b[5]; $yc++; } else return false;
-	if ($b[7] != 0){ $ya += $a['bry']; $yb += $b[7]; $yc++; } else return false;
+	if ($offset[1] != 0){ $ya += $a['tly']; $yb += $offset[1]; $yc++; } else return false;
+	if ($offset[3] != 0){ $ya += $a['try']; $yb += $offset[3]; $yc++; } else return false;
+	if ($offset[5] != 0){ $ya += $a['bly']; $yb += $offset[5]; $yc++; } else return false;
+	if ($offset[7] != 0){ $ya += $a['bry']; $yb += $offset[7]; $yc++; } else return false;
 
-	$c[0] = round($xb / $xc) - round($xa / $xc);
-	$c[1] = round($yb / $yc) - round($ya / $yc);
-
-	return $c;
+	return array(
+		round($xb / $xc) - round($xa / $xc),
+		round($yb / $yc) - round($ya / $yc),
+	);
 }
 
 function offsetxy($a,$offset)
@@ -171,7 +173,6 @@ function offsetxy($a,$offset)
 	$b[1] = $a[1] + $offset[1];
 	return $b;
 }
-
 
 function calcoffset($a,$ox=0,$oy=0)
 {
@@ -185,11 +186,10 @@ function calcoffset($a,$ox=0,$oy=0)
 	return $b;
 }
 
-
 /**
- * Sanitize the page border variables based on width and height of image
+ * Sanitize the coordinates of all the detection areas so it fits within the page
  * 
- * @param mixed $page 
+ * @param array $coordinates 
  * @param int $width The width of the current page
  * @param int $height The height of the current page
  * 
@@ -197,7 +197,7 @@ function calcoffset($a,$ox=0,$oy=0)
  * @author Adam Zammit <adam.zammit@acspri.org.au>
  * @since  2011-08-26
  */
-function sanitizepage($page, $width, $height) {
+function sanitizePageData(&$coordinates, $width, $height) {
 	$tb = array('t','b');
 	$lr = array('l','r');
 	$vh = array('vert','hori');
@@ -210,20 +210,19 @@ function sanitizepage($page, $width, $height) {
 
 				foreach($ex as $d) {
 					$vn = strtoupper($vname . $d);
-					if ($page[$vn] <= 0) $page[$vn] = 1;
-					if ($page[$vn] >= $width) $page[$vn] = $width - 1;
+					if ($coordinates[$vn] <= 0) $coordinates[$vn] = 1;
+					if ($coordinates[$vn] >= $width) $coordinates[$vn] = $width - 1;
 				}
 
 				foreach($ey as $d) {
 					$vn = strtoupper($vname . $d);
-					if ($page[$vn] <= 0) $page[$vn] = 1;
-					if ($page[$vn] >= $height) $page[$vn] = $height - 1;
+					if ($coordinates[$vn] <= 0) $coordinates[$vn] = 1;
+					if ($coordinates[$vn] >= $height) $coordinates[$vn] = $height - 1;
 				}
 
 			}
 		}
 	}
-	return $page;
 }
 
 
@@ -232,30 +231,30 @@ function sanitizepage($page, $width, $height) {
 * Use the template page offsets for calculations of scale and offset
 *
 */
-function detecttransforms($image,$page)
-{
+function detecttransforms($image, $page) {
 	$width = imagesx($image);
 	$height = imagesy($image);
 
-	$page = sanitizepage($page,$width,$height);
+	sanitizePageData($page, $width, $height);
 
-	$offset = offset($image,false,0,$page);
+	$offset = offset($image, false, 0, $page);
 
-	if (!in_array("",$offset)) //all edges detected
-	{
+	if (!in_array('', $offset)) { //all edges detected
 		$centroid = calccentroid($offset);
 		$rotate = calcrotate($offset);
-		$rotate = $rotate - $page['rotation'];
+		$rotate -= $page['rotation'];
 
 		//rotate offset
-		for ($i = 0; $i <= 6; $i += 2)	
+		for ($i = 0; $i <= 6; $i += 2) {
 			list($offset[$i],$offset[$i+1]) = rotate($rotate,array($offset[$i],$offset[$i+1]),$centroid);
-	
+		}
+
 		$scale = calcscale($page,$offset);
 	
 		//scale offset
-		for ($i = 0; $i <= 6; $i += 2)	
+		for ($i = 0; $i <= 6; $i += 2) {
 			list($offset[$i],$offset[$i+1]) = scale($scale,array($offset[$i],$offset[$i+1]),$centroid);
+		}
 		
 		//calc offset
 		$offsetxy = array();
@@ -541,17 +540,22 @@ function horiliney($tlx,$tly,$brx,$bry,$image,$approxw)
 	return $longest;
 }
 
-/* Find a vertical line and return it's position
- *
- *
- *
+/**
+ * Find a vertical line and return it's position
+ * 
+ * @param int $tlx
+ * @param int $tly
+ * @param int $brx
+ * @param int $bry
+ * @param type $image
+ * @param int $approxw
+ * @return boolean
  */
-function vertlinex($tlx,$tly,$brx,$bry,$image,$approxw)
-{
+function vertlinex($tlx, $tly, $brx, $bry, $image, $approxw) {
 	//0 is black, 1 is white
 	$x = 0;
 	//try 10 times to find start of line
-	$yadd = int_divide(($bry - $tly) ,10);
+	$yadd = int_divide(($bry - $tly), 10);
 	$s = array();
 	$count = 0;
 	$avg = 0;
@@ -584,32 +588,27 @@ function vertlinex($tlx,$tly,$brx,$bry,$image,$approxw)
 
 	$line = 0;
 	$longest = key($s);
-	foreach($s as $x => $yval)
-	{
+	foreach($s as $x => $yval) {
 		$col = imagecolorat($image, $x, $tly);
 		$width = 0;
-		for($y = $tly; $y < $bry; $y += 1)
-		{
+		for($y = $tly; $y < $bry; $y += 1) {
 			$rgb = imagecolorat($image, $x, $y);
-			if ($rgb != $col){
+			if ($rgb != $col) {
 				//print "X LINE: $x width: $width COL: $col<br/>";
-				if ($width > $line && $col == 0)
-				{
+				if ($width > $line && $col == 0) {
 					$longest= $x;
 					$line = $width;
 				}
 				$width = 0;
 				$col = $rgb;
 			}
-			$width++;
+		-	$width++;
 		}
 
 	}
 
 	return $longest;
-
 }
-
 
 function overlay($image, $boxes)
 {
