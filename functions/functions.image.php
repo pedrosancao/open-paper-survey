@@ -346,54 +346,53 @@ function applytransforms($a, $transforms) {
 /**
  * Calculate the centroid of an image based on the corner lines
  *
+ * @param array $offset offset data
  * @return array The x and y of the centroid
  */
-function calccentroid($a) {
-	$b = array();
-
+function calccentroid($offset) {
 	$xb = 0;
 	$yb = 0;
 	$xc = 0;
 	$yc = 0;
 
-	if ($a[0] != 0) {
-		$xb += $a[0];
+	if ($offset[0] != 0) {
+		$xb += $offset[0];
 		$xc++;
 	}
-	if ($a[2] != 0) {
-		$xb += $a[2];
+	if ($offset[2] != 0) {
+		$xb += $offset[2];
 		$xc++;
 	}
-	if ($a[4] != 0) {
-		$xb += $a[4];
+	if ($offset[4] != 0) {
+		$xb += $offset[4];
 		$xc++;
 	}
-	if ($a[6] != 0) {
-		$xb += $a[6];
+	if ($offset[6] != 0) {
+		$xb += $offset[6];
 		$xc++;
 	}
 
-	if ($a[1] != 0) {
-		$yb += $a[1];
+	if ($offset[1] != 0) {
+		$yb += $offset[1];
 		$yc++;
 	}
-	if ($a[3] != 0) {
-		$yb += $a[3];
+	if ($offset[3] != 0) {
+		$yb += $offset[3];
 		$yc++;
 	}
-	if ($a[5] != 0) {
-		$yb += $a[5];
+	if ($offset[5] != 0) {
+		$yb += $offset[5];
 		$yc++;
 	}
-	if ($a[7] != 0) {
-		$yb += $a[7];
+	if ($offset[7] != 0) {
+		$yb += $offset[7];
 		$yc++;
 	}
 
-	$b[0] = round($xb / $xc);
-	$b[1] = round($yb / $yc);
-
-	return $b;
+	return array(
+		round($xb / $xc),
+		round($yb / $yc),
+	);
 }
 
 /**
