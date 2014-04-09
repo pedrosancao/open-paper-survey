@@ -41,8 +41,7 @@ include_once('functions.image.php');
  * @author Adam Zammit <adam.zammit@acspri.org.au>
  * @since  2012-01-23
  */
-function defaultpage($width,$height,$qid=0,$pid=0,$data="")
-{
+function defaultpage($width, $height, $qid = 0, $pid = 0, $data='') {
 
 	$xwidth = floor(PAGE_GUIDE_X_PORTION * $width);
 	$yheight =  floor(PAGE_GUIDE_Y_PORTION * $height);
@@ -120,12 +119,11 @@ function defaultpage($width,$height,$qid=0,$pid=0,$data="")
 }
 
 
-
-/* Add a questionnaire to the database
- *
+/**
+ * Add a questionnaire to the database
+ * 
  */
-
-function newquestionnaire($filename,$desc = "",$type="pngmono"){
+function newquestionnaire($filename, $desc = '', $type = 'pngmono') {
 
 	global $db;
 
@@ -285,23 +283,19 @@ function newquestionnaire($filename,$desc = "",$type="pngmono"){
 
 }
 
-
-/* Process the given page
- *
- *
+/**
+ * Process the given page
  *
  */
-function processpage($pid,$fid,$image,$transforms,$qid)
-{
+function processpage($pid, $fid, $image, $transforms, $qid) {
 	//fill boxes for this page
-	fillboxes($pid,$image,$fid,$transforms);
+	fillboxes($pid, $image, $fid, $transforms);
 
 	global $db;
 
 	$ocrqidc = 0;
 	$ocrqidn = 0;
-	if (ICR_ENABLED)
-	{
+	if (ICR_ENABLED) {
 		$sql = "SELECT qid
 			FROM ocrkbboxgroup
 			WHERE qid = '$qid' 
@@ -319,41 +313,40 @@ function processpage($pid,$fid,$image,$transforms,$qid)
 
 		$rs = $db->GetRow($sql);
 
-		if (isset($rs['qid'])) 
+		if (isset($rs['qid'])) {
 			$ocrqidn = $qid; 
+		}
 	}
-	
 
 	//char boxes
-	charboxes($pid,$image,$fid,$transforms,$ocrqidc);
+	charboxes($pid, $image, $fid, $transforms, $ocrqidc);
 
 	//number boxes
-	numberboxes($pid,$image,$fid,$transforms,$ocrqidn);
+	numberboxes($pid, $image, $fid, $transforms, $ocrqidn);
 
 	//barcode boxes
-	barcodeboxes($pid,$image,$fid,$transforms);
+	barcodeboxes($pid, $image, $fid, $transforms);
 
 	//singlechoiceguess
-	singlechoiceguess($pid,$fid);
+	singlechoiceguess($pid, $fid);
 
 	//multiplechoiceguess
-	multiplechoiceguess($pid,$fid);
+	multiplechoiceguess($pid, $fid);
 }
 
-
-function charbox($bid,$fid,$val)
-{
+function charbox($bid, $fid, $val) {
 	global $db;
 	$q = "NULL";
-	if ($val != "")  $q = "'$val'";
+	if ($val != "") {
+		$q = "'$val'";
+	}
 	$db->Query("
 		INSERT INTO
 		formboxverifychar (vid,bid,fid,val) 
 		VALUES ('0','$bid','$fid',$q)");
 }
 
-function textbox($bid,$fid,$val)
-{
+function textbox($bid, $fid, $val) {
 	global $db;
 	$q = "NULL";
 	if ($val != "")  $q = "'$val'";
@@ -363,11 +356,7 @@ function textbox($bid,$fid,$val)
 		VALUES ('0','$bid','$fid',$q)");
 }
 
-
-
-
-function charboxes($pid,$image,$fid,$transforms,$ocrqid)
-{
+function charboxes($pid, $image, $fid, $transforms, $ocrqid) {
 	global $db;
 
 	$boxes = $db->GetAll("
@@ -402,8 +391,7 @@ function charboxes($pid,$image,$fid,$transforms,$ocrqid)
 
 }
 
-function numberboxes($pid,$image,$fid,$transforms,$ocrqid)
-{
+function numberboxes($pid, $image, $fid, $transforms, $ocrqid) {
 	global $db;
 
 	$boxes = $db->GetAll("
@@ -438,9 +426,7 @@ function numberboxes($pid,$image,$fid,$transforms,$ocrqid)
 
 }
 
-
-function barcodeboxes($pid,$image,$fid,$transforms)
-{
+function barcodeboxes($pid, $image, $fid, $transforms) {
 	global $db;
 
 	$boxes = $db->GetAll("
@@ -459,9 +445,7 @@ function barcodeboxes($pid,$image,$fid,$transforms)
 
 }
 
-
-function boxfilled($bid,$fid,$filled)
-{
+function boxfilled($bid, $fid, $filled) {
 	global $db;
 	$db->Query("
 		INSERT INTO
@@ -469,29 +453,21 @@ function boxfilled($bid,$fid,$filled)
 		VALUES ('$bid','$fid','$filled')");
 }
 
-
-
-function fillboxes($pid,$image,$fid,$transforms)
-{
+function fillboxes($pid, $image, $fid, $transforms) {
 	global $db;
 
-	$boxes = $db->GetAll("	SELECT b.bid,b.tlx,b.tly,b.brx,b.bry,b.pid 
+	$boxes = $db->GetAll("SELECT b.bid, b.tlx, b.tly, b.brx, b.bry, b.pid 
 				FROM boxes as b
 				JOIN boxgroupstype AS bg on (bg.bgid = b.bgid AND (bg.btid = 1 or bg.btid = 2 or bg.btid = 3 or bg.btid = 4))
 				WHERE b.pid = '$pid'");
 
-	foreach ($boxes as $i)
-	{
-		$fill = fillratio($image,applytransforms($i,$transforms));
-	        //print "{$i['bid']} - $fill<br/>";
-		boxfilled($i['bid'],$fid,$fill);
+	foreach ($boxes as $i) {
+		$fill = fillratio($image, applytransforms($i, $transforms));
+		boxfilled($i['bid'], $fid, $fill);
 	}
-
 }
 
-
-function singlechoiceguess($pid,$fid)
-{
+function singlechoiceguess($pid, $fid) {
 	$minfilled = SINGLE_CHOICE_MIN_FILLED;
 	$maxfilled = SINGLE_CHOICE_MAX_FILLED;
 
@@ -510,9 +486,8 @@ function singlechoiceguess($pid,$fid)
 
 	$bgid = "";
 
-	foreach ($boxes as $i)
-	{
-		if ($i['bgid'] != $bgid){
+	foreach ($boxes as $i) {
+		if ($i['bgid'] != $bgid) {
 			$bgid = $i['bgid'];
 
 			$sql = "SELECT formboxes.bid as bid
@@ -528,12 +503,10 @@ function singlechoiceguess($pid,$fid)
 			$rs = $db->GetAll($sql);
 			$recs = count($rs);
 
-			if ($recs >= 1)
-			{
+			if ($recs >= 1) {
 				$Tbid = $rs[0]['bid'];
 			}
-			else  
-			{
+			else {
 				$sql = "SELECT formboxes.bid as bid
 				FROM `formboxes` 
 				LEFT JOIN boxes ON formboxes.bid = boxes.bid
@@ -546,37 +519,28 @@ function singlechoiceguess($pid,$fid)
 				$rs = $db->GetAll($sql);
 				$recs = count($rs);
 
-				if ($recs >= 1)
-				{
+				if ($recs >= 1) {
 					$Tbid = $rs[0]['bid'];
-				}else
-				{
+				} else {
 					$Tbid = "";
 				}
-
-
 			}
 
 		}
 		$bid = $i['bid'];
-		if ($Tbid == $bid)
-		{
+		if ($Tbid == $bid) {
 			//print "$bid - filled<br/>";
-			charbox($bid,$fid,1);
+			charbox($bid, $fid, 1);
 		}
-		else
-		{
+		else {
 			//print "$bid - empty<br/>";
-			charbox($bid,$fid,0);
+			charbox($bid, $fid, 0);
 		}
 	}
 
 }
 
-
-
-function multiplechoiceguess($pid,$fid)
-{
+function multiplechoiceguess($pid, $fid) {
 	$minfilled = MULTIPLE_CHOICE_MIN_FILLED;
 	$maxfilled = MULTIPLE_CHOICE_MAX_FILLED;
 
@@ -611,15 +575,11 @@ function multiplechoiceguess($pid,$fid)
 
 }
 
-
-
-/* Import a form given in the file
- *
- *
+/**
+ * Import a form given in the file
  *
  */
-function import($filename,$description = false)
-{
+function import($filename, $description = false) {
 	global $db;
 
 	set_time_limit(240);
@@ -636,29 +596,25 @@ function import($filename,$description = false)
 
 	$pfid = false;
 
-	if (count($pf) >= 1)
-	{
-		if ($pf[0]['allowanother'] == 1) //update record instead of creating new one
+	if (count($pf) >= 1) {
+		if ($pf[0]['allowanother'] == 1) { //update record instead of creating new one
 			$pfid = $pf[0]['pfid'];
-		else
+		} else {
 			return false; //this form has already been processed	
+		}
 	}
 	
-
 	//Import the file
 	print T_("Importing") . ": $filename";
 
-
-
-	if (!$description) $description = $filename;
-
-
+	if (!$description) {
+		$description = $filename;
+	}
 
 	//START TRANSACTION:
 	// Don't use "StartTrans and CompleteTrans"
 	// as we want to use it only for stopping the form committing half way
 	// not monitoring all SQL statements for errors
-
 	$db->BeginTrans();
 
 	//count of missing pages
@@ -677,10 +633,8 @@ function import($filename,$description = false)
 
 	//find the qid
 	$n = 1;
-
-	$file = $tmp . $n . ".png";
-	while (file_exists($file))
-	{
+	$file = $tmp . $n . '.png';
+	while (file_exists($file)) {
 		print T_("Finding qid") . "...";
 
 		//open file
@@ -690,31 +644,42 @@ function import($filename,$description = false)
 
 		$images = split_scanning($image);
 
-		foreach($images as $image)
-		{
+		foreach($images as $image) {
 
 			$width = imagesx($image);
 			$height = imagesy($image);
 
 			$btlx = floor(BARCODE_TLX_PORTION * $width);
-			if ($btlx <= 0) $btlx = 1;
+			if ($btlx <= 0) {
+				$btlx = 1;
+			}
 			
 			$btly = floor(BARCODE_TLY_PORTION * $height);
-			if ($btly <= 0) $btly = 1;
+			if ($btly <= 0) {
+				$btly = 1;
+			}
 
 			$bbrx = floor(BARCODE_BRX_PORTION * $width);
-			if ($bbrx <= 0) $bbrx = 1;
+			if ($bbrx <= 0) {
+				$bbrx = 1;
+			}
 
 			$bbry = floor(BARCODE_BRY_PORTION * $height);
-			if ($bbry <= 0) $bbry = 1;
+			if ($bbry <= 0) {
+				$bbry = 1;
+			}
 
 
-			$barcode = crop($image,array("tlx" => $btlx, "tly" => $btly, "brx" => $bbrx, "bry" => $bbry));
+			$barcode = crop($image, array(
+				'tlx' => $btlx,
+				'tly' => $btly,
+				'brx' => $bbrx,
+				'bry' => $bbry,
+			));
 
 			//check for barcode
-			$pid = barcode($barcode,1,BARCODE_LENGTH_PID);
-			if ($pid)
-			{
+			$pid = barcode($barcode, 1, BARCODE_LENGTH_PID);
+			if ($pid) {
 				//print "BARCODE: $pid<br/>";
 	
 				//get the page id from the page table
@@ -723,8 +688,7 @@ function import($filename,$description = false)
 	
 				$page = $db->GetRow($sql);
 	
-				if (isset($page['qid']))
-				{
+				if (isset($page['qid'])) {
 					$qid = $page['qid'];
 					break 2;
 				}
@@ -737,13 +701,11 @@ function import($filename,$description = false)
 		unset($images);
 
 		$n++;
-		$file = $tmp . $n . ".png";	
+		$file = $tmp . $n . '.png';	
 	}
 
-
-	if ($qid != "")
-	{
-		print T_("Got qid") . ": $qid...";
+	if ($qid != '') {
+		print T_('Got qid') . ": $qid...";
 
 		//create form entry in DB
 		$sql = "INSERT INTO forms (fid,qid,description)
@@ -753,13 +715,10 @@ function import($filename,$description = false)
 
 		$fid = $db->Insert_Id();
 	
-
-
 		//process each page
 		$n = 1;
-		$file = $tmp . $n . ".png";
-		while (file_exists($file))
-		{
+		$file = $tmp . $n . '.png';
+		while (file_exists($file)) {
 			//open file
 			$data = file_get_contents($file);
 			$image = imagecreatefromstring($data);
@@ -768,8 +727,7 @@ function import($filename,$description = false)
 			unset($data);
 			unset($image);
 
-			foreach($images as $image)
-			{
+			foreach($images as $image) {
 				//get the data from the image
 				ob_start();
 				imagepng($image);
@@ -780,26 +738,37 @@ function import($filename,$description = false)
 				$height = imagesy($image);
 	
 				$btlx = floor(BARCODE_TLX_PORTION * $width);
-				if ($btlx <= 0) $btlx = 1;
+				if ($btlx <= 0) {
+					$btlx = 1;
+				}
 				
 				$btly = floor(BARCODE_TLY_PORTION * $height);
-				if ($btly <= 0) $btly = 1;
+				if ($btly <= 0) {
+					$btly = 1;
+				}
 	
 				$bbrx = floor(BARCODE_BRX_PORTION * $width);
-				if ($bbrx <= 0) $bbrx = 1;
+				if ($bbrx <= 0) {
+					$bbrx = 1;
+				}
 	
 				$bbry = floor(BARCODE_BRY_PORTION * $height);
-				if ($bbry <= 0) $bbry = 1;
-	
+				if ($bbry <= 0) {
+					$bbry = 1;
+				}
 
 				//check for barcode
-				$barcode = crop($image,array("tlx" => $btlx, "tly" => $btly, "brx" => $bbrx, "bry" => $bbry));
+				$barcode = crop($image, array(
+					'tlx' => $btlx,
+					'tly' => $btly,
+					'brx' => $bbrx,
+					'bry' => $bbry
+				));
 				
-				$pid = barcode($barcode,1,BARCODE_LENGTH_PID);
+				$pid = barcode($barcode, 1, BARCODE_LENGTH_PID);
 
-				if ($pid)
-				{
-					print T_("Processing pid") . ": $pid...";
+				if ($pid) {
+					print T_("Processing pid") . ": $pid...<br/>";
 	
 					//get the page id from the page table
 					$sql = "SELECT * FROM pages
@@ -808,8 +777,7 @@ function import($filename,$description = false)
 	
 					$page = $db->GetRow($sql);
 	
-					if (empty($page))
-					{
+					if (empty($page)) {
 						print T_("Pid not identified for this page, inserting into missing pages...");
 	
 						//store in missing pages table
@@ -821,54 +789,45 @@ function import($filename,$description = false)
 
 						$missingpagecount++;
 					}
-					else
-					{
-						if ($page['store'] == 1)
-						{
-		
+					else {
+						if ($page['store'] == 1) {
 							//calc offset
 							//$offset = offset($image,$page,1);
 			
 							//calc transforms
-							$transforms = detecttransforms($image,$page);
+							$transforms = detecttransforms($image, $page);
 	
 							//save image to db including offset
 							$sql = "INSERT INTO formpages
 								(fid,pid,filename,image";
-							
-							foreach($transforms as $key => $val)
+							foreach($transforms as $key => $val) {
 								$sql .= ",$key";
-	
+							}
 							$sql .=	")
 								VALUES ('$fid','{$page["pid"]}','','" . addslashes($data) . "'";
-	
-							foreach($transforms as $key => $val)
+							foreach($transforms as $key => $val) {
 								$sql .= ",'$val'";
-	
+							}
 							$sql .=	")";
 					
 							$db->Execute($sql);
 						}
 			
-						if ($page['process'] == 1)
-						{		
+						if ($page['process'] == 1) {		
 							//process variables on this page
-							processpage($page["pid"],$fid,$image,$transforms,$qid);
+							processpage($page["pid"], $fid, $image, $transforms, $qid);
 						}
 					}
 				}
-				else
-				{
+				else {
 					$width = imagesx($image) - 1;
 					$height = imagesy($image) - 1;
 	
-					if(BLANK_PAGE_DETECTION && is_blank_page($image,defaultpage($width,$height)))
-					{
+					if(BLANK_PAGE_DETECTION && is_blank_page($image, defaultpage($width, $height))) {
 						print T_("Blank page: ignoring");
 						//let this page dissolve into the ether
 					}
-					else
-					{
+					else {
 						print T_("Could not get pid, inserting into missing pages...");
 	
 						//store in missing pages table
@@ -893,8 +852,7 @@ function import($filename,$description = false)
 		}
 
 		//Update or insert record in to processforms log database
-		if ($pfid == false)
-		{
+		if ($pfid == false) {
 			//insert a new record as no existing for this form
 			$sql = "INSERT INTO processforms (pfid,filepath,filehash,date,status,allowanother)
 				VALUES (NULL,'$filename','$filehash',NOW(),1,0)";
@@ -903,8 +861,7 @@ function import($filename,$description = false)
 
 			$pfid = $db->Insert_ID();
 		}
-		else
-		{	
+		else {	
 			//update exisiting record
 			$sql = "UPDATE processforms
 				SET date = NOW(),
@@ -924,8 +881,7 @@ function import($filename,$description = false)
 
 		$db->Execute($sql);
 	}
-	else
-	{
+	else {
 		//form could not be identified...
 		//do nothing?
 		print T_("Could not get qid...");
@@ -954,24 +910,20 @@ function import($filename,$description = false)
 		}
 	}
 
-
 	//Delete temporary pages
 	$n = 1;
-	$file = $tmp . $n . ".png";
-	while (file_exists($file))
-	{
+	$file = $tmp . $n . '.png';
+	while (file_exists($file)) {
 		//delete temp file
 		unlink($file);
 
 		$n++;
-		$file = $tmp . $n . ".png";	
+		$file = $tmp . $n . '.png';	
 	}
-
 
 	//If only one page is missing, and one page in the missing pages database,
 	//assume this is the missing page and process it.
-	if (isset($fid))
-	{
+	if (isset($fid)) {
 		$sql = "SELECT mpid, mp.image as mpimage, p.*
 			FROM forms AS f, pages AS p
 			LEFT JOIN formpages AS fp ON (fp.fid = '$fid' and fp.pid = p.pid )
@@ -983,8 +935,7 @@ function import($filename,$description = false)
 
 		$rs = $db->GetAll($sql);
 
-		if (count($rs) == 1)
-		{
+		if (count($rs) == 1) {
 			//There is one page in the missing database and one page missing from the form
 			$row = $rs[0];
 		
@@ -993,28 +944,28 @@ function import($filename,$description = false)
 			$mpid = $row['mpid'];
 			$image = imagecreatefromstring($row['mpimage']);
 
-			if ($row['store'] == 1)
-			{
+			if ($row['store'] == 1) {
 				//calc transforms
 				$transforms = detecttransforms($image,$row);
 
 				//save image to db including offset
 				$sql = "INSERT INTO formpages
 					(fid,pid,filename,image";
-						
-				foreach($transforms as $key => $val)
+				foreach($transforms as $key => $val) {
 					$sql .= ",$key";
-					$sql .=	")
-					VALUES ('$fid','{$row["pid"]}','','" . addslashes($row['mpimage']) . "'";
+				}
+				$sql .=	")
+				VALUES ('$fid','{$row["pid"]}','','" . addslashes($row['mpimage']) . "'";
 
-				foreach($transforms as $key => $val)
+				foreach($transforms as $key => $val) {
 					$sql .= ",'$val'";
-					$sql .=	")";
+				}
+				$sql .=	")";
 
 				$db->Execute($sql);
 			}
-			if ($row['process'] == 1)
-			{		
+
+			if ($row['process'] == 1) {
 				//process variables on this page
 				processpage($row["pid"],$fid,$image,$transforms,$qid);
 			}
@@ -1027,8 +978,7 @@ function import($filename,$description = false)
 		}
 	
 		//if all pages have been entered and dected, and there are missing pages - delete them
-		if ($missingpagecount > 0)
-		{
+		if ($missingpagecount > 0) {
 			$sql = "SELECT count(*) AS c
 				FROM forms AS f, pages AS p
 				LEFT JOIN formpages AS fp ON ( fp.fid = '$fid' AND fp.pid = p.pid )
@@ -1038,8 +988,7 @@ function import($filename,$description = false)
 
 			$rs = $db->GetRow($sql);
 
-			if (isset($rs['c']) && $rs['c'] == 0)
-			{
+			if (isset($rs['c']) && $rs['c'] == 0) {
 				//there are missing pages in the mp table, but no missing pages in the form table... 
 				$sql = "DELETE 
 					FROM missingpages
@@ -1052,15 +1001,11 @@ function import($filename,$description = false)
 		}
 	}
 
-
-
-
 	//complete transaction
 	$db->CommitTrans();
 
 	return true;
 }
-
 
 /**
  * Import ICR information
@@ -1072,8 +1017,7 @@ function import($filename,$description = false)
  * @since  2010-09-21
  * @link http://quexml.sourceforge.net/
  */
-function import_icr($xml)
-{
+function import_icr($xml) {
 	global $db;
 
 	$db->StartTrans();
@@ -1114,8 +1058,7 @@ function import_icr($xml)
  * @since  2010-09-21
  * @link http://quexml.sourceforge.net/
  */
-function import_bandingxml($xml,$qid,$erase = false)
-{
+function import_bandingxml($xml, $qid, $erase = false) {
 	global $db;
 
 	$db->StartTrans();
@@ -1265,8 +1208,7 @@ function import_bandingxml($xml,$qid,$erase = false)
  *
  * @param string $dir The directory to look for files to import
  */
-function import_directory($dir)
-{
+function import_directory($dir) {
 
 	if ($handle = opendir($dir)) {
 	
@@ -1290,7 +1232,3 @@ function import_directory($dir)
 	}
 
 }
-
-
-
-?>
