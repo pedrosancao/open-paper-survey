@@ -442,17 +442,15 @@ function calcrotate($a) {
  *
  *
  */
-function rotate($angle = false, $point, $centroid, $costheta = false, $sintheta = false) {
+function rotate($angle, $point, $centroid, $costheta = false, $sintheta = false) {
 	if ($angle !== false) {
 		$sintheta = sin($angle);
 		$costheta = cos($angle);
 	}
-
-	$a = array();
-	$a[0] = round((($costheta * ($point[0] - $centroid[0])) - ($sintheta * ($point[1] - $centroid[1]))) + $centroid[0]);
-	$a[1] = round((($sintheta * ($point[0] - $centroid[0])) + ($costheta * ($point[1] - $centroid[1]))) + $centroid[1]);
-
-	return $a;
+	return array(
+		round($costheta * ($point[0] - $centroid[0]) - $sintheta * ($point[1] - $centroid[1]) + $centroid[0]),
+		round($sintheta * ($point[0] - $centroid[0]) + $costheta * ($point[1] - $centroid[1]) + $centroid[1]),
+	);
 }
 
 /**
