@@ -30,14 +30,7 @@
  *
  */
 
-/**
- * Configuration file
- */
 include_once(dirname(__FILE__).'/../config.inc.php');
-
-/**
- * Database file
- */
 include_once(dirname(__FILE__).'/../db.inc.php');
 
 /**
@@ -46,8 +39,7 @@ include_once(dirname(__FILE__).'/../db.inc.php');
  * @return bool|int False if none otherwise the client id
  *
  */
-function get_client_id()
-{
+function get_client_id() {
 	global $db;
 
 	$sql = "SELECT cid
@@ -56,10 +48,11 @@ function get_client_id()
 
 	$o = $db->GetRow($sql);
 
-	if (empty($o)) 	return false;
+	if (empty($o)) {
+		return false;
+	}
 
 	return $o['cid'];
-
 }
 
 /**
@@ -69,8 +62,7 @@ function get_client_id()
  * @return bool|array False if nothing assigned otherwise an array of questionnaire assigned
  *
  */
-function get_client_questionnaire($client_id)
-{
+function get_client_questionnaire($client_id) {
 	global $db;
 
 	$sql = "SELECT qid
@@ -79,11 +71,9 @@ function get_client_questionnaire($client_id)
 
 	$o = $db->GetAll($sql);
 
-	if (empty($o)) 	return false;
+	if (empty($o)) {
+		return false;
+	}
 
 	return $o;
-
-
 }
-
-

@@ -22,11 +22,10 @@
  *
  */
 
-
 include_once(dirname(__FILE__).'/../config.inc.php');
 
-
-/* Given a 1 bit image containing a barcode
+/**
+ * Given a 1 bit image containing a barcode
  * Return an array of bar widths
  */
 function barWidth($image, $scany) {
@@ -37,8 +36,7 @@ function barWidth($image, $scany) {
 	$col = imagecolorat($image, 0, $scany);
 	for ($x = 0; $x < $xdim; $x++) {
 		$rgb = imagecolorat($image, $x, $scany);
-		if ($rgb != $col)
-		{
+		if ($rgb != $col) {
 			$b[] = $count;
 			//$b[]['colour'] = $rgb;
 			$count = 0;
@@ -47,13 +45,11 @@ function barWidth($image, $scany) {
 		}
 		$count++;	
 	}
-
 	return $b;
-
 }
 
-
-/* Given an array of widths, return the guess of
+/**
+ * Given an array of widths, return the guess of
  * the width of narrow and wide bars
  */
 function nwWidth($array) {
@@ -75,47 +71,54 @@ function nwWidth($array) {
 	return $a;
 }
 
-
-/* Given an array of widths, an estimate of the widths
+/**
+ * Given an array of widths, an estimate of the widths
  * of wide and narrow bars, return narrow/wide rep as string
  */
-function widthsToNW($widths,$narrow,$wide)
-{
+function widthsToNW($widths,$narrow,$wide) {
 	//give a large tolerance
 
 	$tolerance = (($wide - $narrow) - 1) / 2;
-	$string = "";
+	$string = '';
 
 	$nmin = ($narrow - $tolerance);
-	if ($nmin <= 0) $nmin = 1;
+	if ($nmin <= 0) {
+		$nmin = 1;
+	}
 
-
-	foreach($widths as $width)
-	{
-		if (($width >= ($nmin)) && ($width <= ($narrow + $tolerance))) $string .= "N";
-		else if (($width >= ($wide - $tolerance)) && ($width <= ($wide + $tolerance))) $string .= "W";
-		else $string .= "J"; //J for junk
+	foreach($widths as $width) {
+		if (($width >= ($nmin)) && ($width <= ($narrow + $tolerance))) {
+			$string .= "N";
+		}
+		elseif (($width >= ($wide - $tolerance)) && ($width <= ($wide + $tolerance))) {
+			$string .= "W";
+		}
+		else {
+			$string .= "J"; //J for junk
+		}
 	}
 
 	//remove junk bits from start and end of string
-	$firstJ = strpos($string,'J');
-	if ($firstJ <= ((strlen($string) /4)))
-		$string = substr($string,$firstJ + 1);
+	$firstJ = strpos($string, 'J');
+	if ($firstJ <= ((strlen($string) / 4))) {
+		$string = substr($string, $firstJ + 1);
+	}
 
-	$lastJ = strpos($string,'J', ((strlen($string) / 4) * 3));
-	if ($lastJ >= ((strlen($string)/4)*3))
-		$string = substr($string,0,$lastJ);
+	$lastJ = strpos($string, 'J', ((strlen($string) / 4) * 3));
+	if ($lastJ >= ((strlen($string) / 4) * 3)) {
+		$string = substr($string, 0, $lastJ);
+	}
 
 	return $string;
 }
 
-/* Given a string of n's and w's return a code (for CodaBar)
+/**
+ * Given a string of n's and w's return a code (for CodaBar)
  * Bar widthds sourced from: http://www.barcodesymbols.com/codabar.htm
  *
  * Added an extra "N" to the end of each to account for intercode spacing (always narrow)
  */
-function NWtoCodeCodaBar($s)
-{
+function NWtoCodeCodaBar($s) {
 	$hash = array();
 
 	$hash['NNNNNWWN'] = 0;
@@ -140,24 +143,21 @@ function NWtoCodeCodaBar($s)
 	$hash['NNNWWWNN'] = 'D';
 	
 	$code = "";
-	for ($i = 0; $i < strlen($s); $i+= 8)
-	{
+	for ($i = 0; $i < strlen($s); $i+= 8) {
 		$b1 = substr($s,$i,8);
-		if (!isset($hash[$b1]))
+		if (!isset($hash[$b1])) {
 			return "false";
-		else
-			$code .= $hash[$b1];
+		}
+		$code .= $hash[$b1];
 	}
 
 	return $code;
 }
 
-
-
-/* Given a string of n's and w's return a code (for Interleaved 2 of 5)
+/**
+ * Given a string of n's and w's return a code (for Interleaved 2 of 5)
  */
-function NWtoCode($s)
-{
+function NWtoCode($s) {
 	$hash = array();
 	$hash['NNWWN'] = 0;
 	$hash['WNNNW'] = 1;
@@ -172,50 +172,47 @@ function NWtoCode($s)
 
 	$code = "";
 	//ignore the first 4 and last 3
-	for ($i = 4; $i < (strlen($s) - 3); $i+= 10)
-	{
+	for ($i = 4; $i < (strlen($s) - 3); $i+= 10) {
 		$b1 = $s[$i] . $s[$i + 2] . $s[$i + 4] . $s[$i + 6] . $s[$i + 8];
 		$b2 = $s[$i + 1] . $s[$i + 3] . $s[$i + 5] . $s[$i + 7] . $s[$i + 9];
-		if (!isset($hash[$b1]) || !isset($hash[$b2]))
+		if (!isset($hash[$b1]) || !isset($hash[$b2])) {
 			return "false";
-		else
-			$code .= $hash[$b1] . $hash[$b2];
+		}
+		$code .= $hash[$b1] . $hash[$b2];
 	}
 
 	return $code;
 }
 
-function validate($s)
-{
+function validate($s) {
 	//length must be 10 * count + 7
 	//must start with nnnn
 	//must end with wnn
 	
-	if ( (fmod((strlen($s)-7.0),10.0) == 0) && (strncmp($s,"NNNN",4) == 0) && (strncmp(substr($s,(strlen($s)-3),3),"WNN",3) == 0)) return true;
+	if ((fmod((strlen($s)-7.0),10.0) == 0) && (strncmp($s,"NNNN",4) == 0) && (strncmp(substr($s,(strlen($s)-3),3),"WNN",3) == 0)) {
+		return true;
+	}
 
 	return false;
 
 }
 
-function validateCodaBar($s)
-{
+function validateCodaBar($s) {
 	//length + 1 must be a multiple of 8 (each character is 7 bars/spaces and a space)
 	//must start and end with a start/stop character (A,B,C or D)
 	
-	if ( (fmod((strlen($s) + 1),8.0) == 0))
-	{
+	if ((fmod((strlen($s) + 1),8.0) == 0)) {
 		$start = NWtoCodeCodaBar(substr($s,0,8));
 		$end = NWtoCodeCodaBar(substr($s,-7) . "N");
-		if (($start == 'A' || $start  == 'B' || $start == 'C' || $start == 'D') && ($end == 'A' || $end  == 'B' || $end == 'C' || $end == 'D'))
+		if (($start == 'A' || $start  == 'B' || $start == 'C' || $start == 'D') && ($end == 'A' || $end  == 'B' || $end == 'C' || $end == 'D')) {
 			return true;	
+		}
 	}
 	return false;
-
 }
 
-
-
-/* Given a GD image, Find an interleaved 2 of 5 barcode and return it otherwise
+/**
+ * Given a GD image, Find an interleaved 2 of 5 barcode and return it otherwise
  * return false
  *
  * Currently steps pixel by pixel (step = 1)
@@ -243,26 +240,24 @@ function barcode($image, $step = 1, $length = false) {
 	for ($i = ($step); $i < $height - ($step); $i += ($step)) {
 		$a = barWidth($image,$i);
 		$w = nwWidth($a);
-		if ($w['n'] != 0 && $w['w'] != 0){
-			$s = widthsToNW($a,$w['n'],$w['w']);
+		if ($w['n'] != 0 && $w['w'] != 0) {
+			$s = widthsToNW($a, $w['n'], $w['w']);
 			if(validate($s)){
 				$code = NWtoCode($s);
-				if ($code != "false" && (!$length || strlen($code) == $length))
+				if ($code != "false" && (!$length || strlen($code) == $length)) {
 					return $code;
+				}
 			}
-			else if (validateCodaBar($s))
-			{
+			elseif (validateCodaBar($s)) {
 				$code = NWtoCodeCodaBar($s . "N"); //remember to add the last space
-				if ($code != "false")
-				{
+				if ($code != "false") {
 					$code = substr($code,1,-1); //remove the start and stop characters
-					if (!$length || strlen($code) == $length)
+					if (!$length || strlen($code) == $length) {
 						return $code;
+					}
 				}
 			}
 		}
 	}
 	return false;
 }
-
-?>

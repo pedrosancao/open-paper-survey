@@ -22,16 +22,14 @@
  *
  */
 
-
 include_once(dirname(__FILE__).'/../config.inc.php');
 include_once(dirname(__FILE__).'/../db.inc.php');
 
-/* Sort box groups by pageid then box tly tlx
- *
+/**
+ * Sort box groups by pageid then box tly tlx
  */
 function sort_order_pageid_box($qid) {
 	global $db;
-
 
 	$db->StartTrans();
 
@@ -46,8 +44,7 @@ function sort_order_pageid_box($qid) {
 	$all = $db->GetAll($sql);
 
 	$i = 0;
-	foreach ($all as $row)
-	{
+	foreach ($all as $row) {
 		$sql = "UPDATE boxgroupstype
 			SET sortorder = '$i'
 			WHERE bgid = '{$row['bgid']}'";
@@ -58,15 +55,13 @@ function sort_order_pageid_box($qid) {
 	}
 
 	$db->CompleteTrans();
-
 }
 
-/* Sort box groups by their variable name
- *
+/**
+ * Sort box groups by their variable name
  */
 function sort_order_varname($qid) {
 	global $db;
-
 
 	$db->StartTrans();
 
@@ -79,8 +74,7 @@ function sort_order_varname($qid) {
 	$all = $db->GetAll($sql);
 
 	$i = 0;
-	foreach ($all as $row)
-	{
+	foreach ($all as $row) {
 		$sql = "UPDATE boxgroupstype
 			SET sortorder = '$i'
 			WHERE bgid = '{$row['bgid']}'";
@@ -91,10 +85,9 @@ function sort_order_varname($qid) {
 	}
 
 	$db->CompleteTrans();
-
 }
 
-/*
+/**
  * Assign the next free form to a verifier
  */
 function assign_to($vid) {
@@ -102,16 +95,13 @@ function assign_to($vid) {
 
 	$db->StartTrans();
 
-/*
-	$sql = "SELECT f.fid as fid
-		FROM forms as f
-		WHERE f.done = 0 and f.assigned_vid is NULL
-		ORDER BY f.fid ASC 
-		LIMIT 1";
- */
+//	$sql = "SELECT f.fid as fid
+//		FROM forms as f
+//		WHERE f.done = 0 and f.assigned_vid is NULL
+//		ORDER BY f.fid ASC 
+//		LIMIT 1";
 
-	//only assign a form if none currently assigned
-	//
+	// only assign a form if none currently assigned
 	$sql = "SELECT f.fid as fid
 		FROM forms as f
 		WHERE f.done = 0
@@ -156,10 +146,8 @@ function assign_to($vid) {
 					WHERE fp.fid = f.fid 
 					AND fp.pid = p.pid))";
 	}
-
-        $sql .= " ORDER BY f.fid ASC
-		LIMIT 1";
-
+	$sql .= " ORDER BY f.fid ASC
+	LIMIT 1";
 
 	$rs = $db->GetRow($sql);
 
@@ -168,9 +156,9 @@ function assign_to($vid) {
 	if (!empty($rs)) {
 		$fid = $rs['fid'];
 		
-		$sql = "UPDATE verifiers
-			SET currentfid = '$fid'
-			WHERE vid = '$vid'";
+//		$sql = "UPDATE verifiers
+//			SET currentfid = '$fid'
+//			WHERE vid = '$vid'";
 
 		$sql = "UPDATE forms
 			SET assigned_vid = '$vid'
@@ -201,15 +189,13 @@ function assign_to_merge($vid) {
 
 	$fid = false;
 
-	if (!empty($rs))
-	{
+	if (!empty($rs)) {
 		$fid = $rs['fid'];
 	}
 
 	$db->CompleteTrans();
 
 	return $fid;
-
 }
 
 function get_vid() {
@@ -229,7 +215,7 @@ function get_vid() {
 	}
 }
 
-function get_fid($vid = "") {
+function get_fid($vid = '') {
 	global $db;
 
 	$sql = "SELECT fid
@@ -239,8 +225,8 @@ function get_fid($vid = "") {
 
 	$rs = $db->GetRow($sql);
 
-	if (empty($rs)) {
-		return false;//invalid user
+	if (empty($rs)) { //invalid user
+		return false;
 	}
 	else {
 		if (empty($rs['fid'])) {
@@ -250,7 +236,6 @@ function get_fid($vid = "") {
 		}
 	}
 	return false;
-
 }
 
 function detect_differences() {
@@ -263,8 +248,7 @@ function detect_differences() {
 
 	$r = $db->GetAll($sql);
 
-	foreach ($r as $f)
-	{
+	foreach ($r as $f) {
 		$fid = $f['fid'];
 		print "$fid: <br/>";
 		
@@ -296,14 +280,11 @@ function detect_differences() {
 
 		$diffs = $db->GetAll($sql);
 
-		foreach($diffs as $diff)
-		{
+		foreach($diffs as $diff) {
 			print_r($diff);
 			print "<br/>";
 		}
-
 	}
-
 }
 
 function get_qid_description($fid) {

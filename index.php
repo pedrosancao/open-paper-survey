@@ -45,10 +45,3 @@ AND w.fid = f.fid
 AND f.qid = q.qid
 ORDER BY w.completed
 ";
-
-
-
-
-
-
-?>

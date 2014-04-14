@@ -29,7 +29,6 @@
  * 
  */
 
-
 /**
  * Display a valid XHTML Strict header
  *
@@ -42,28 +41,40 @@
  * 
  * @see xhtml_foot()
  */
-function xhtml_head($title="",$body=true,$css=false,$javascript=false,$bodytext=false,$refresh=false)
-{
+function xhtml_head($title = '', $body = true, $css = false, $javascript = false, $bodytext = false, $refresh = false) {
 print "<?xml version=\"1.0\" encoding=\"utf-8\"?>";
 ?>
-	<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" 
-	   "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
 	<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
-	<head><title><?php if (empty($title)) print "queXF"; else print "queXF: $title"; ?></title>
+	<head>
+		<title>queXF<?php if (!empty($title)) print ": $title"; ?></title>
 <?php
-	if ($css)
-		foreach ($css as $c) print "<link rel='stylesheet' href='$c' type='text/css'></link>";
-	if ($javascript)
-		foreach ($javascript as $j) print "<script type='text/javascript' src='$j'></script>";
-	if ($refresh)
+	if ($css) {
+		foreach ($css as $c) {
+			print "<link rel='stylesheet' href='$c' type='text/css'></link>";
+		}
+	}
+	if ($javascript) {
+		foreach ($javascript as $j) {
+			print "<script type='text/javascript' src='$j'></script>";
+		}
+	}
+	if ($refresh) {
 		print " <!--Set to refresh every $refresh seconds-->
 			<meta http-equiv='Cache-Control' content='no-cache'/>
 			<meta http-equiv='refresh' content='$refresh'/>";
-	if (!$body) return;
+	}
+	if (!$body) {
+		return;
+	}
 ?>
 	</head>
 <?php
-	if ($bodytext) print "<body $bodytext>"; else print "<body>";
+	if ($bodytext) {
+		print "<body $bodytext>";
+	} else {
+		print "<body>";
+	}
 }
 
 /**
@@ -71,9 +82,7 @@ print "<?xml version=\"1.0\" encoding=\"utf-8\"?>";
  *
  * @see xhtml_head()
  */
-
-function xhtml_foot()
-{
+function xhtml_foot() {
 ?>
 	</body>
 	</html>
@@ -91,31 +100,30 @@ function xhtml_foot()
  * @param bool|array $highlight False if nothing to highlight else an array containing the field to highlight
  * 
  */
-function xhtml_table($content,$fields,$head = false,$class = "tclass",$highlight=false)
-{
+function xhtml_table($content, $fields, $head = false, $class = "tclass", $highlight = false) {
 	print "<table class='$class'>";
-	if ($head)
-	{
+	if ($head) {
 		print "<tr>";
-		foreach ($head as $e)
+		foreach ($head as $e) {
 			print"<th>$e</th>";
+		}
 		print "</tr>";
 	}
-	foreach($content as $row)
-	{
-		if ($highlight && isset($row[key($highlight)]) && $row[key($highlight)] == current($highlight))
+	foreach($content as $row) {
+		if ($highlight && isset($row[key($highlight)]) && $row[key($highlight)] == current($highlight)) {
 			print "<tr class='highlight'>";
-		else
+		} else {
 			print "<tr>";
+		}
 
-		foreach ($fields as $e)
+		foreach ($fields as $e) {
 			print "<td>{$row[$e]}</td>";
+		}
 		
 		print "</tr>";
 	}
 	print "</table>";
 }
-
 
 /**
  * Display a drop down list based on a given array
@@ -135,41 +143,38 @@ function xhtml_table($content,$fields,$head = false,$class = "tclass",$highlight
  * @param array|bool $select The element to select manually (element,string) (not using selected=\'selected\' in array)
  *
  */
-function display_chooser($elements, $selectid, $var, $useblank = true, $pass = false, $js = true, $indiv = true, $selected = false)
-{
+function display_chooser($elements, $selectid, $var, $useblank = true, $pass = false, $js = true, $indiv = true, $selected = false) {
 	if ($indiv) print "<div>";
 	print "<select id='$selectid' name='$selectid' ";
 	if ($js) print "onchange=\"LinkUp('$selectid')\"";
 	print ">";
-	if ($useblank)
-	{
+	if ($useblank) {
 		print "<option value='";
 		if ($js) print "?";
-		if ($pass != false)
+		if ($pass != false) {
 			print $pass;
+		}
 		print "'></option>";
 	}
-	foreach($elements as $e)
-	{
-		if ($js)
-		{
+	foreach($elements as $e) {
+		if ($js) {
 			print "<option value='?$var={$e['value']}";
 			if ($pass != false)
 				print "&amp;$pass";
 			print "' ";
 		}
-		else
-		{
+		else {
 			print "<option value='{$e['value']}' ";
 		}
 
-		if ($selected == false)
-		{
-			if (isset($e['selected']))
+		if ($selected == false) {
+			if (isset($e['selected'])) {
 				print $e['selected']; 
+			}
 		}
-		else
-			if (strcmp($selected[1],$e[$selected[0]]) == 0) print "selected='selected'";
+		elseif (strcmp($selected[1],$e[$selected[0]]) == 0) {
+			print "selected='selected'";
+		}
 
 		print ">".$e['description']."</option>";
 	}
@@ -184,12 +189,12 @@ function display_chooser($elements, $selectid, $var, $useblank = true, $pass = f
  * @param string $id The id of the object
  * @param string $class The class of the object defaults to embeddedobject
  */
-function xhtml_object($data, $id, $class="embeddedobject")
-{
-	if (browser_ie())
+function xhtml_object($data, $id, $class="embeddedobject") {
+	if (browser_ie()) {
 		print '<iframe class="'.$class.'" id="'.$id.'" src="'.$data.'" frameBorder="0"><p>Error, try with Firefox</p></iframe>';
-	else
+	} else {
 		print '<object class="'.$class.'" id="'.$id.'" data="'.$data.'" standby="Loading panel..." type="application/xhtml+xml"><p>Error, try with Firefox</p></object>';
+	}
 }
 
 /**
@@ -197,13 +202,9 @@ function xhtml_object($data, $id, $class="embeddedobject")
  *
  * @return bool True if MSIE is detected otherwise false
  */
-function browser_ie()
-{
-    if (isset($_SERVER['HTTP_USER_AGENT']) && (strpos($_SERVER['HTTP_USER_AGENT'], 'MSIE') !== false))
+function browser_ie() {
+    if (isset($_SERVER['HTTP_USER_AGENT']) && (strpos($_SERVER['HTTP_USER_AGENT'], 'MSIE') !== false)) {
         return true;
-    else
-        return false;
+	}
+	return false;
 }
-
-
-?>

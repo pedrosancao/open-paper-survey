@@ -22,16 +22,14 @@
  *
  */
 
-
 include_once("config.inc.php");
 include_once("db.inc.php");
 include_once("functions/functions.xhtml.php");
 
-
-/* Create a box group in the DB
+/**
+ * Create a box group in the DB
  */
-function updateboxgroup($bgid,$width,$varname,$btid)
-{
+function updateboxgroup($bgid, $width, $varname, $btid) {
 	global $db;
 	$db->StartTrans();
 
@@ -48,8 +46,7 @@ function updateboxgroup($bgid,$width,$varname,$btid)
  * When boxes are evenly spaced, boxes are created inbetween
  * Delete the inbetween boxes
  */
-function deleteinbetween($bgid)
-{
+function deleteinbetween($bgid) {
 	global $db;
 	$db->StartTrans();
 
@@ -60,14 +57,11 @@ function deleteinbetween($bgid)
 	$rows = $db->GetAll($sql);
 
 	$rc = 1;
-	foreach($rows as $row)
-	{
-		if (($rc % 2) == 0 && next($rows)) // if even and there is at least one more box
-		{
+	foreach($rows as $row) {
+		if (($rc % 2) == 0 && next($rows)) { // if even and there is at least one more box
 			$sql = "DELETE
 				FROM boxes
 				WHERE bid = '{$row['bid']}'";
-	
 			$db->Execute($sql);
 
 		}
@@ -77,15 +71,12 @@ function deleteinbetween($bgid)
 	$db->CompleteTrans();
 
 	return $bgid;
-
 }
-
 
 /**
  * Delete a box from a boxgroup
  */
-function deletebox($bid)
-{
+function deletebox($bid) {
 	global $db;
 
 	$sql = "DELETE
@@ -94,17 +85,13 @@ function deletebox($bid)
 	
 	$db->Execute($sql);
 
-
 	return $bid;
-
 }
 
-
-
-/* Delete a box group in the DB
+/**
+ * Delete a box group in the DB
  */
-function deleteboxgroup($bgid)
-{
+function deleteboxgroup($bgid) {
 
 	global $db;
 	$db->StartTrans();
@@ -115,8 +102,7 @@ function deleteboxgroup($bgid)
 
 	$rows = $db->GetAll($sql);
 
-	foreach($rows as $row)
-	{
+	foreach($rows as $row) {
 		$sql = "DELETE
 			FROM boxes
 			WHERE bid = '{$row['bid']}'";
@@ -135,33 +121,25 @@ function deleteboxgroup($bgid)
 	return $bgid;
 }
 
-if (isset($_GET['deletebgid']))
-{
+if (isset($_GET['deletebgid'])) {
 	deleteboxgroup(intval($_GET['deletebgid']));
 	exit();
 }
 
-if (isset($_GET['deletebid']))
-{
+if (isset($_GET['deletebid'])) {
 	deletebox(intval($_GET['deletebid']));
 	exit();
 }
 
-
-if (isset($_GET['deleteinbetween']))
-{
+if (isset($_GET['deleteinbetween'])) {
 	deleteinbetween(intval($_GET['deleteinbetween']));
 }
 
-
-if (isset($_GET['bgid']) && isset($_GET['btid']))
-{
+if (isset($_GET['bgid']) && isset($_GET['btid'])) {
 	updateboxgroup(intval($_GET['bgid']),1,'',$intval($_GET['btid']));
 }
 
-
-if (isset($_POST['submit']))
-{
+if (isset($_POST['submit'])) {
 	$bgid = $_POST['bgid'];
 	$width = $_POST['width'];
 	$varname = $_POST['varname'];
@@ -169,24 +147,21 @@ if (isset($_POST['submit']))
 	updateboxgroup($bgid,$width,$varname,$btid);
 }
 
-
-
-if (isset($_GET['bgid']) || isset($_GET['bid']))
-{
+if (isset($_GET['bgid']) || isset($_GET['bid'])) {
 	xhtml_head(T_("Modify box"));
 
 	global $db;
 
-	if (isset($_GET['bid'])){
+	if (isset($_GET['bid'])) {
 		$bid = intval($_GET['bid']);
 		$sql = "SELECT bgid 
 			FROM boxes
 			WHERE bid = '$bid'";
 		$row = $db->GetRow($sql);
 		$bgid = $row['bgid'];
-	}else
+	} else {
 		$bgid = intval($_GET['bgid']);
-
+	}
 	
 	$sql = "SELECT btid,varname,width
 		FROM boxgroupstype
@@ -226,8 +201,3 @@ if (isset($_GET['bgid']) || isset($_GET['bid']))
 
 	xhtml_foot();
 }
-
-
-
-
-?>

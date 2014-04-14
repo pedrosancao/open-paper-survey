@@ -22,38 +22,32 @@
  *
  */
 
-
 include_once("config.inc.php");
 include_once("db.inc.php");
 include_once("functions/functions.database.php");
 				
 global $db;
 
-
 $fid = "";
 $pid = "";
 $var = "";
 
-if (isset($_GET['fid']))
-{
+if (isset($_GET['fid'])) {
 	$fid = $_GET['fid'];
 }
 
-
 $q = get_qid_description($fid);
 
-if (!isset($q['qid']))
-	$qid = "";
-else
+$qid = "";
+if (isset($q['qid'])) {
 	$qid = $q['qid'];
+}
 
-if (isset($_GET['pid']))
-{
+if (isset($_GET['pid'])) {
 	$pid = intval($_GET['pid']);
 }
 
-if (isset($_GET['var']))
-{
+if (isset($_GET['var'])) {
 	$var = $_GET['var'];
 	$vars = $db->qstr($_GET['var']);
 
@@ -65,18 +59,14 @@ if (isset($_GET['var']))
 
 	$v = $db->GetRow($sql);
 	
-	if (isset($v['pid']))
-	{
+	if (isset($v['pid'])) {
 		$pid = $v['pid'];
 	}
 }
-
-
 ?>
 
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
-        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-      <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
 <title><?php echo T_("Review Form"); ?> - <?php print "FID:$fid"; ?></title>
 <style type="text/css">
@@ -118,12 +108,7 @@ if (isset($_GET['var']))
 </style>
 </head>
 <body>
-
-
-
 <?php
-
-
 
 //show content
 print "<div id=\"content\">";
@@ -133,7 +118,6 @@ print "</div></div>";
 //show list of bgid for this fid
 print "<div id=\"header\">";
 	print "<p>F:$fid</p>";
-
 ?>
 
 	<form action="" method="get">
@@ -142,27 +126,23 @@ print "<div id=\"header\">";
 		<?php echo T_("Page:"); ?> <input type="text" size="4" name="pid" value="<?php echo $pid ?>"/>
 		<input type="submit"/></div>
 	</form>
-
 <?php
 
 	/*
-	foreach($_SESSION['boxgroups'] as $key => $val)
-	{
-		if ($val['pid'] == $pid)
-		{
-			//if ($bgid == $key)
+	foreach($_SESSION['boxgroups'] as $key => $val) {
+		if ($val['pid'] == $pid) {
+			//if ($bgid == $key) {
 				print "<strong>{$val['varname']}</strong><br/>";
-			//else
+			//}
+			//else {
 			//	print "<a id=\"link$key\" href=\"" . $_SERVER['PHP_SELF'] . "?bgid=$key&amp;fid=$fid#boxGroup\">{$val['varname']}</a><br/>";
+			//}
 		}	
 	}*/
-	
 print "</div>";
 
 //show list of pid for this fid
-	print "<div id=\"topper\">";
-
-	$count = 1;	
+print "<div id=\"topper\">";
 
 	$sql = "SELECT pid
 		FROM pages
@@ -170,30 +150,20 @@ print "</div>";
 		ORDER BY pidentifierval ASC";
 
 	$pages = $db->GetAll($sql);
-	
 
-	foreach($pages as $page)
-	{
+	$count = 1;	
+	foreach($pages as $page) {
 		$p = $page['pid'];
 
-		if ($pid == $p)
+		if ($pid == $p) {
 			print "<strong>$count</strong>";
-		else
+		} else {
 			print " <a href=\"" . $_SERVER['PHP_SELF'] . "?pid=$p&amp;fid=$fid\">$count</a> ";
+		}
 		$count++;
-
 	}
 	
 print "</div>";
-
-
-
-
 ?>
 
-
 </body></html>
-
-
-
-

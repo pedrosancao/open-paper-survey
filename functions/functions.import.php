@@ -22,7 +22,6 @@
  *
  */
 
-
 include_once(dirname(__FILE__).'/../config.inc.php');
 include_once(dirname(__FILE__).'/../db.inc.php');
 include_once('functions.barcode.php');
@@ -117,7 +116,6 @@ function defaultpage($width, $height, $qid = 0, $pid = 0, $data='') {
 
 	return $record;
 }
-
 
 /**
  * Add a questionnaire to the database

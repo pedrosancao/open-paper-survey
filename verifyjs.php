@@ -77,6 +77,20 @@ function bgidtocss($fid, $pid, $zoom = 1) {
 	if ($page['height'] == 0) $page['height'] = PAGE_HEIGHT;
 
 	print "<form method=\"post\" action=\"{$_SERVER['PHP_SELF']}\">";
+
+	/* correct values * /
+	$page = array(
+		'offx' => 90,
+		'offy' => 130,
+		'centroidx' => $page['centroidx'],
+		'centroidy' => $page['centroidy'],
+		'costheta' => $page['costheta'],
+		'sintheta' => $page['sintheta'],
+		'scalex' => 2068 / 2241,
+		'scaley' => 2975 / 3176,
+		'width' => $page['width'],
+		'height' => $page['height'],
+	);/**/
 	
 	foreach ($boxgroups as $boxgroup) {
 		$crop = applytransforms($boxgroup, $page);
@@ -486,9 +500,8 @@ elseif ($pid == "") {
 }	
 ?>
 
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
-        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-      <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
 <title><?php echo T_("Verifier"); ?> - <?php print "QID:$qid FID:$fid DESC:$description"; ?></title>
 <script type="text/javascript">
@@ -1093,10 +1106,8 @@ if ($pid == "") {
 	print "<div id=\"wait\" style=\"visibility: hidden;\">
 <p>" . T_("Submitting: Please wait...") . "</p>
 </div>";
-
 }
 else {
-	
 	//show content
 	$pw = PAGE_WIDTH;
 	if (empty($_SESSION['pages'][$pid]['fid'])) { //if page missing
@@ -1159,4 +1170,5 @@ function show_top($fid, $pid) {
 	print "</div>";
 }
 ?>
-</body></html>
+</body>
+</html>

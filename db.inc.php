@@ -44,6 +44,3 @@ $db->SetFetchMode(ADODB_FETCH_ASSOC);
 
 //store session in database (see sessions2 table)
 //ADOdb_Session::config(DB_TYPE, DB_HOST, DB_USER, DB_PASS, DB_NAME,$options=false);
-
-
-?>

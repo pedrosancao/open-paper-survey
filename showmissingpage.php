@@ -22,8 +22,7 @@
  *
  */
 
-if (isset($_GET['mpid']))
-{
+if (isset($_GET['mpid'])) {
 	include_once("config.inc.php");
 	include_once("db.inc.php");
 
@@ -40,5 +39,3 @@ if (isset($_GET['mpid']))
 	header("Content-type: image/png");
 	echo ($row['image']);
 }
-
-?>

@@ -22,8 +22,7 @@
  *
  */
 
-
-if (isset($_GET['bgid'])){
+if (isset($_GET['bgid'])) {
 
 	include_once("config.inc.php");
 	include_once("db.inc.php");
@@ -68,15 +67,13 @@ if (isset($_GET['bgid'])){
 
 
 }
-else if (isset($_GET['filename']))
-{
+elseif (isset($_GET['filename'])) {
 	$im = imagecreatefrompng($_GET['filename']);
 	header('Content-type: image/png');
 	imagepng($im);
 	imagedestroy($im);
 }
-else if (isset($_GET['pid']))
-{
+elseif (isset($_GET['pid'])) {
 	include("config.inc.php");
 	include("db.inc.php");
 	include("functions/functions.image.php");
@@ -204,6 +201,3 @@ else if (isset($_GET['pid']))
 	}
 
 }
-
-
-?>

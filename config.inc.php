@@ -23,9 +23,10 @@
  */
 
 
-/* CONFIGURATION FILE */
 
-/* See the file: config.default.php for more configuration directives
+/* CONFIGURATION FILE
+ * 
+ * See the file: config.default.php for more configuration directives
  *
  * If there is a directive that you wish to change, DO NOT modify it on config.default.php
  *
@@ -52,4 +53,3 @@ define('TEMPORARY_DIRECTORY', "/tmp");
 
 //Do not remove the following line:
 include(dirname(__FILE__) . '/config.default.php');
-?>

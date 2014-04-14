@@ -22,7 +22,7 @@
  *
  */
 
-if (isset($_GET['pid'])){
+if (isset($_GET['pid'])) {
 
 	include_once("config.inc.php");
 	include_once("db.inc.php");
@@ -33,8 +33,7 @@ if (isset($_GET['pid'])){
 	$vid = intval($_GET['vid']);
 	$fid = intval($_GET['fid']);
 
-	if (isset($_GET['submit']))
-	{
+	if (isset($_GET['submit'])) {
 		$note = $db->qstr($_GET['pagenote']);
 		
 		$sql = "INSERT INTO formpagenote (fpnid,fid,pid,vid,note)
@@ -51,8 +50,7 @@ if (isset($_GET['pid'])){
 
 	$rs = $db->GetAll($sql);
 
-	foreach($rs as $r)
-	{
+	foreach($rs as $r) {
 		print "<div>" . $r['note'] . "</div>";
 	}
 
@@ -66,5 +64,3 @@ if (isset($_GET['pid'])){
 	print "</form>";
 
 }
-
-?>

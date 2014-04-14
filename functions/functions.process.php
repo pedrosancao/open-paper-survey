@@ -39,15 +39,13 @@ include_once(dirname(__FILE__).'/../config.inc.php');
  */
 include_once(dirname(__FILE__).'/../db.inc.php');
 
-
 /**
  * Determine if a process is already running
  *
  * @param int $type Defaults to 1 - specify the process type (class) to search for
  * @return bool|int Return false if no process already running, else return the process_id
  */
-function is_process_running($type = 1)
-{
+function is_process_running($type = 1) {
 	global $db;
 
 	$sql = "SELECT `process_id`
@@ -69,8 +67,7 @@ function is_process_running($type = 1)
  * @param int $process_id The process id 
  * @return bool Return false if not to be killed, else return true
  */
-function is_process_killed($process_id)
-{
+function is_process_killed($process_id) {
 	global $db;
 
 	$sql = "SELECT `process_id`
@@ -87,7 +84,6 @@ function is_process_killed($process_id)
 	return false;
 }
 
-
 /**
  * Start a process
  *
@@ -97,8 +93,7 @@ function is_process_killed($process_id)
  * 
  * @link http://www.djkaty.com/php/fork Cross platform process tutorial (this code adapted from here)
  */
-function start_process($filename,$type = 1)
-{
+function start_process($filename, $type = 1) {
 	//create a record only if no process already running
 	global $db;
 
@@ -108,36 +103,34 @@ function start_process($filename,$type = 1)
 
 	$args = 0;
 
-	if ($process == false)
-	{
+	if ($process == false) {
 		$sql = "INSERT INTO `process` (`process_id`,`type`,`start`,`stop`,`kill`,`data`)
 			VALUES (NULL,'$type',NOW(),NULL,0,'')";
 
 		$rs = $db->Execute($sql);
 		$args = $db->Insert_ID();
 
-
 		//execute the process in the background - pass the process_id as the first argument
-		if (substr(PHP_OS, 0, 3) == 'WIN')
+		if (substr(PHP_OS, 0, 3) == 'WIN') {
 			$proc = popen(WINDOWS_PHP_EXEC . ' ' . $filename . ' ' . $args, 'r');
-		else
+		} else {
 			$proc = popen(PHP_EXEC . ' ' . $filename . ' ' . $args . ' &', 'r');
+		}
 	
 		pclose($proc);
 	}
-	else
+	else {
 		$db->FailTrans();
-
+	}
 
 	$db->CompleteTrans();
 
-
-	if ($args != 0)
+	if ($args != 0) {
 		return $args;
+	}
 
 	return false;	
 }
-
 
 /**
  * Signal to kill a process
@@ -145,8 +138,7 @@ function start_process($filename,$type = 1)
  * @param int $process_id The process id
  *
  */
-function kill_process($process_id)
-{
+function kill_process($process_id) {
 	global $db;
 
 	$sql = "UPDATE `process`
@@ -154,10 +146,7 @@ function kill_process($process_id)
 		WHERE `process_id` = '$process_id'";
 
 	$db->Execute($sql);
-
 }
-
-
 
 /**
  * End a process
@@ -165,8 +154,7 @@ function kill_process($process_id)
  * @param int $process_id The process id
  *
  */
-function end_process($process_id)
-{
+function end_process($process_id) {
 	global $db;
 
 	$sql = "UPDATE `process`
@@ -176,7 +164,6 @@ function end_process($process_id)
 	$db->Execute($sql);
 }
 
-
 /**
  * Append data to a process
  *
@@ -184,8 +171,7 @@ function end_process($process_id)
  * @param string $data Data to append to this process
  *
  */
-function process_append_data($process_id,$data)
-{
+function process_append_data($process_id,$data) {
 	global $db;
 
 	$data = $db->qstr($data,get_magic_quotes_gpc());
@@ -194,9 +180,7 @@ function process_append_data($process_id,$data)
 		VALUES (NULL,'$process_id',NOW(),$data)";
 
 	$db->Execute($sql);
-
 }
-
 
 /**
  * Get data from a process
@@ -205,8 +189,7 @@ function process_append_data($process_id,$data)
  * @return string Data from this process or an empty string if none available
  *
  */
-function process_get_data($process_id)
-{
+function process_get_data($process_id) {
 	global $db;
 
 	$sql = "SELECT process_log_id,DATE_FORMAT(datetime,'" . DATE_TIME_FORMAT ."') as datetime,data
@@ -217,8 +200,9 @@ function process_get_data($process_id)
 
 	$rs = $db->GetAll($sql);
 
-	if (!empty($rs))
+	if (!empty($rs)) {
 		return $rs;	
+	}
 
 	return false;
 }
@@ -230,8 +214,7 @@ function process_get_data($process_id)
  * @return string Data from the last process, or an empty string if not available
  *
  */
-function process_get_last_data($type = 1)
-{
+function process_get_last_data($type = 1) {
 	global $db;
 
 	$sql = "SELECT process_id
@@ -242,10 +225,9 @@ function process_get_last_data($type = 1)
 
 	$rs = $db->GetRow($sql);
 
-	if (!empty($rs))
+	if (!empty($rs)) {
 		return process_get_data($rs['process_id']);
+	}
 
 	return false;
 }
-
-?>

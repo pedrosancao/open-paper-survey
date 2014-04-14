@@ -22,16 +22,13 @@
  *
  */
 
-
 include_once(dirname(__FILE__).'/../config.inc.php');
 
-
-/* Find boxes in a horizontal selection
+/**
+ * Find boxes in a horizontal selection
  * given an array containing the widths of horizontal lines
- *
  */
-function horiBoxDetection($lw)
-{
+function horiBoxDetection($lw) {
 	//get most common width, assume it is box size
 	$e = array_count_values($lw[0]);
 	arsort($e);
@@ -39,33 +36,30 @@ function horiBoxDetection($lw)
 	$tmp = array();
 
 	//step through close values
-	foreach ($e as $key => $val)
-	{
-		$nkey = "";
-		for ($i = -9; $i < 10; $i++)
-		{
-			if (isset($tmp[$key + $i])) 
-			{
+	foreach ($e as $key => $val) {
+		$nkey = '';
+		for ($i = -9; $i < 10; $i++) {
+			if (isset($tmp[$key + $i])) {
 				$nkey  = $key + $i;
 				break;
 			}
 		}
-		if ($nkey == "")
+		if ($nkey == '') {
 			$tmp[$key] = $val;
-		else
+		} else {
 			$tmp[$nkey] = $tmp[$nkey] + $val;
-
+		}
 	}
 
 	arsort($tmp);
 
 	//Make sure that we are not using unworkable size boxes
 
-	for ($i = 0; $i <= count($tmp); $i++)
-	{
+	for ($i = 0; $i <= count($tmp); $i++) {
 		$asize = key($tmp);
-		if ($asize >= MIN_BOX_WIDTH)
+		if ($asize >= MIN_BOX_WIDTH) {
 			break;
+		}
 		next($tmp);
 	}
 
@@ -74,12 +68,14 @@ function horiBoxDetection($lw)
 
 	$startx = array();
 
-	for ($i = 0; $i < count($lw[0]); $i++)
-	{
-		if ($lw[0][$i] > $min && $lw[0][$i] < $max)
-		{
-			@$startx[$lw[1][$i]]++;
-			@$starty[$lw[2][$i]]++;
+	for ($i = 0; $i < count($lw[0]); $i++) {
+		if ($lw[0][$i] > $min && $lw[0][$i] < $max) {
+			if (isset($startx[$lw[1][$i]])) {
+				$startx[$lw[1][$i]]++;
+			}
+			if (isset($startx[$lw[2][$i]])) {
+				$starty[$lw[2][$i]]++;
+			}
 		}
 	}
 	
@@ -96,16 +92,13 @@ function horiBoxDetection($lw)
 	end($starty);
 	$bry = key($starty);
 
-
 	//print_r($startx);
 	//print "<br/>$tly $bry<br/>";
 
 	$aliasArray =& $startx;
 
-	foreach($aliasArray as $key => $value)
-	{
-		if (current($aliasArray))
-		{
+	foreach($aliasArray as $key => $value) {
+		if (current($aliasArray)) {
 			//if there is a next element, move to it
 			$key2 = key($aliasArray);
 			$value2 = current($aliasArray);	
@@ -113,20 +106,15 @@ function horiBoxDetection($lw)
 			//print "$key2 - $key < $asize / 4<br/>";
 	
 			//if they are close
-			if (($key2 - $key) < ($asize / 3))
-			{
+			if (($key2 - $key) < ($asize / 3)) {
 				//remove the record with the lowest value
-				if ($value < $value2){
+				if ($value < $value2) {
 					$aliasArray[$key] = 0;
-				}
-				else
-				{
+				} else {
 					$aliasArray[$key2] = 0;
 				}		
 			}
-	
 		}
-			
 	}
 
 	$atlx = array();
@@ -134,11 +122,9 @@ function horiBoxDetection($lw)
 	$abrx = array();
 	$abry = array();
 
-	foreach($aliasArray as $key => $value)
-	{
+	foreach($aliasArray as $key => $value) {
 		//ignore small boxes
-		if ($value >= MIN_BOX_WIDTH)
-		{
+		if ($value >= MIN_BOX_WIDTH) {
 			//print "HORI BOX: $key,$tly : " . ($key + $asize) . ",$bry<br/>";
 			$atlx[] = $key;
 			$atly[] = $tly;
@@ -154,15 +140,12 @@ function horiBoxDetection($lw)
 	$a[] = $abry;
 
 	return $a;
-
 }
 
-/* vasBoxDetection
+/**
  * Handle specific case of a Visual Analog Scale
- *
  */
-function vasBoxDetection($lw)
-{
+function vasBoxDetection($lw) {
 	//A VAS looks like this:
 	//
 	//
@@ -198,15 +181,12 @@ function vasBoxDetection($lw)
 	$asize = key($e);
 	$ksize = $e[$asize];
 
-	if ($ksize < 15)
-	{
+	if ($ksize < 15) {
 		$ksize = next($e);
 		$asize = key($e);
 	}
 
-
-	if ($asize >= VAS_LENGTH_MIN && $asize <= VAS_LENGTH_MAX)
-	{
+	if ($asize >= VAS_LENGTH_MIN && $asize <= VAS_LENGTH_MAX) {
 		//length of line will be 1200px
 
 		//find x of start of line
@@ -217,12 +197,9 @@ function vasBoxDetection($lw)
 
 		$count = 0;
 		$av = 0;
-		foreach($lw[1] as $key => $val)
-		{
-			if ($val == $xstart)
-			{
-				if ($lw[0][$key] < 20)
-				{
+		foreach($lw[1] as $key => $val) {
+			if ($val == $xstart) {
+				if ($lw[0][$key] < 20) {
 					$count++;
 					$av += $lw[0][$key];
 				}
@@ -253,14 +230,12 @@ function vasBoxDetection($lw)
 		$abrx = array();
 		$abry = array();		
 
-		for ($i = 0; $i < VAS_BOXES; $i++)
-		{
+		for ($i = 0; $i < VAS_BOXES; $i++) {
 			$atlx[] = $xstart;
 			$atly[] = $ystart;
 			$xstart += VAS_BOX_WIDTH;
 			$abrx[] = $xstart;
 			$abry[] = $yend;
-	
 		}
 
 		$a = array();
@@ -270,22 +245,15 @@ function vasBoxDetection($lw)
 		$a[] = $abry;
 
 		return $a;
-	
-
-	}else
-		return false; //not a VAS
-
-
+	}
+	return false; //not a VAS
 }
 
-
-/* Find boxes in a vertical selection
+/**
+ * Find boxes in a vertical selection
  * given an array containing the widths of horizontal lines
- *
  */
-
-function vertBoxDetection($lw)
-{
+function vertBoxDetection($lw) {
 	//get most common width, assume it is box size
 	$e = array_count_values($lw[0]);
 	arsort($e);
@@ -298,12 +266,14 @@ function vertBoxDetection($lw)
 	$startx = array();
 	$starty = array();
 
-	for ($i = 0; $i < count($lw[0]); $i++)
-	{
-		if ($lw[0][$i] > $min && $lw[0][$i] < $max)
-		{
-			@$startx[$lw[1][$i]]++;
-			@$starty[$lw[2][$i]]++;
+	for ($i = 0; $i < count($lw[0]); $i++) {
+		if ($lw[0][$i] > $min && $lw[0][$i] < $max) {
+			if (isset($startx[$lw[1][$i]])) {
+				$startx[$lw[1][$i]]++;
+			}
+			if (isset($startx[$lw[2][$i]])) {
+				$starty[$lw[2][$i]]++;
+			}
 		}
 	}
 	
@@ -318,7 +288,6 @@ function vertBoxDetection($lw)
 
 	//print_r($startx);
 
-
 	//remove array values where there is the lowest number of them, and there is another within +-width/4
 	//use bubble sort like tactic
 
@@ -326,7 +295,6 @@ function vertBoxDetection($lw)
 	ksort($starty);
 
 	//print_r($starty);
-
 	//print_r($startx);
 	//print "<br/><br/>";
 
@@ -337,10 +305,8 @@ function vertBoxDetection($lw)
 
 	$aliasArray =& $starty;
 
-	foreach($aliasArray as $key => $value)
-	{
-		if (current($aliasArray))
-		{
+	foreach($aliasArray as $key => $value) {
+		if (current($aliasArray)) {
 			//if there is a next element, move to it
 			$key2 = key($aliasArray);
 			$value2 = current($aliasArray);
@@ -348,27 +314,20 @@ function vertBoxDetection($lw)
 			//print "$key2 - $key < $asize / 4<br/>";
 	
 			//if they are close
-			if (($key2 - $key) < ($asize / 3))
-			{
+			if (($key2 - $key) < ($asize / 3)) {
 				//remove the record with the lowest value
-				if ($value < $value2){
+				if ($value < $value2) {
 					$aliasArray[$key] = 0;
-				}
-				else
-				{
+				} else {
 					$aliasArray[$key2] = 0;
 				}		
-			}else
-			{
+			} else {
 				//start box
 				$bey[] = $key;
 				$bsy[] = $key2;
 				//print "$key2 - $key < $asize / 4<br/>";
-
 			}
-	
 		}
-			
 	}
 
 	end($aliasArray);
@@ -382,29 +341,23 @@ function vertBoxDetection($lw)
 	$abrx = array();
 	$abry = array();
 
-	for ($i = 0; $i < count($bsy); $i++)
-	{
+	for ($i = 0; $i < count($bsy); $i++) {
 		$atlx[] = $tlx;
 		$atly[] = $bsy[$i];
 		$abrx[] = $tlx + $asize;
 		$abry[] = $bey[$i];
 	}
 
-	/*
-
-	foreach($aliasArray as $key => $value)
-	{
-		if ($value != 0)
-		{
-			print "VERT BOX: $tlx,$key : " . ($brx + $asize) . ",$key<br/>";
-			print "VERT BOX: tlx: $tlx key: $key value: $value brx: $brx<br/>";
-			$atlx[] = $tlx;
-			$atly[] = $key;
-			$abrx[] = $brx + $asize;
-			$abry[] = $key;
-		}
-	}
-	 */
+//	foreach($aliasArray as $key => $value) {
+//		if ($value != 0) {
+//			print "VERT BOX: $tlx,$key : " . ($brx + $asize) . ",$key<br/>";
+//			print "VERT BOX: tlx: $tlx key: $key value: $value brx: $brx<br/>";
+//			$atlx[] = $tlx;
+//			$atly[] = $key;
+//			$abrx[] = $brx + $asize;
+//			$abry[] = $key;
+//		}
+//	}
 
 	$a = array();
 	$a[] = $atlx;
@@ -413,19 +366,14 @@ function vertBoxDetection($lw)
 	$a[] = $abry;
 
 	return $a;
-
 }
 
-
-
-/* Given an image and a bounding box
+/**
+ * Given an image and a bounding box
  * return an array containing the widths of lines in each row of pixels
  * not including the first line
- *
  */
-
-function lineWidth($tlx,$tly,$brx,$bry,$image)
-{
+function lineWidth($tlx, $tly, $brx, $bry, $image) {
 	$b = array();
 	$al = array();
 	$ax = array();
@@ -434,21 +382,16 @@ function lineWidth($tlx,$tly,$brx,$bry,$image)
 	
 	$startx = $tlx;
 	$starty = $tly;
-	
 
 	$col = imagecolorat($image, $tlx, $tly);
-	for ($y = $tly; $y < $bry; $y++){
-		
+	for ($y = $tly; $y < $bry; $y++) {
 		$lc = 0;
-
 		for ($x = $tlx; $x < $brx; $x++) {
 			$rgb = imagecolorat($image, $x, $y);
-			if ($rgb != $col)
-			{
-				if ($rgb == 0)
-				{
+			if ($rgb != $col) {
+				if ($rgb == 0) {
 					//don't return the first line on the row
-					if ($lc != 0){
+					if ($lc != 0) {
 						$al[] = $count;
 						$ax[] = $startx;
 						$ay[] = $starty;
@@ -469,10 +412,4 @@ function lineWidth($tlx,$tly,$brx,$bry,$image)
 	$b[] = $ax;
 	$b[] = $ay;
 	return $b;
-
 }
-
-
-
-
-?>

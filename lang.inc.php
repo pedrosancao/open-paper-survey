@@ -41,14 +41,15 @@ require_once(dirname(__FILE__).'/include/php-gettext-1.0.11/gettext.inc');
  * @param array The elements in the array to translate
  * @return The array with the elements translated
  */
-function translate_array(&$a,$b)
-{
-	foreach ($a as &$row)
-		foreach($b as $el)
-			if (isset($row[$el])) $row[$el] = T_($row[$el]);
+function translate_array(&$a,$b) {
+	foreach ($a as &$row) {
+		foreach($b as $el) {
+			if (isset($row[$el])) {
+				$row[$el] = T_($row[$el]);
+			}
+		}
+	}
 }
-
-
 
 $locale = substr($_SERVER['HTTP_ACCEPT_LANGUAGE'], 0, 2);
 if (empty($locale)) $locale = DEFAULT_LOCALE;
@@ -56,5 +57,3 @@ T_setlocale(LC_MESSAGES, $locale);
 T_bindtextdomain($locale,  dirname(__FILE__)."/locale");
 T_bind_textdomain_codeset($locale, 'UTF-8');
 T_textdomain($locale);
-
-?>
