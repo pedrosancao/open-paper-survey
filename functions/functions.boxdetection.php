@@ -66,15 +66,19 @@ function horiBoxDetection($lw) {
 	$min = $asize - ($asize / 8);
 	$max = $asize + ($asize / 8);
 
-	$startx = array();
+	$startx = $starty = array();
 
 	for ($i = 0; $i < count($lw[0]); $i++) {
 		if ($lw[0][$i] > $min && $lw[0][$i] < $max) {
 			if (isset($startx[$lw[1][$i]])) {
 				$startx[$lw[1][$i]]++;
+			} else {
+				$startx[$lw[1][$i]] = 1;
 			}
-			if (isset($startx[$lw[2][$i]])) {
+			if (isset($starty[$lw[2][$i]])) {
 				$starty[$lw[2][$i]]++;
+			} else {
+				$starty[$lw[2][$i]] = 1;
 			}
 		}
 	}
@@ -270,9 +274,13 @@ function vertBoxDetection($lw) {
 		if ($lw[0][$i] > $min && $lw[0][$i] < $max) {
 			if (isset($startx[$lw[1][$i]])) {
 				$startx[$lw[1][$i]]++;
+			} else {
+				$startx[$lw[1][$i]] = 1;
 			}
-			if (isset($startx[$lw[2][$i]])) {
+			if (isset($starty[$lw[2][$i]])) {
 				$starty[$lw[2][$i]]++;
+			} else {
+				$starty[$lw[2][$i]] = 1;
 			}
 		}
 	}
