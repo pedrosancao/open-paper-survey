@@ -304,14 +304,9 @@ class Barcode {
 
 }
 
-/**
- * Search and read an interleaved 2 of 5 or a codabar barcode
- *
- * @param resource $image image of type GD
- * @param int $step pixels to read
- * @param int $length length of barcode
- * @return string the found barcode or false
- */
+// theses functions were keep for backward compatibility,
+// while the other modules are not updates
+
 function barcode($image, $step = 1, $length = false) {
 	$params = func_get_args();
 	call_user_func_array('Barcode::read', $params);
