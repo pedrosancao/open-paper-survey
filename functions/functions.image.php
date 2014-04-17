@@ -498,14 +498,20 @@ function scale($scale, $point, $centroid) {
 	return $c;
 }
 
-function crop($image, $a) {
-	$newwidth = $a['brx'] - $a['tlx'];
-	$newheight = $a['bry'] - $a['tly'];
-	$new = imagecreatetruecolor($newwidth, $newheight);
-	imagepalettecopy($new, $image);
-	imagecopyresized($new, $image, 0, 0, $a['tlx'], $a['tly'], $newwidth, $newheight, $newwidth, $newheight);
-	//print "$tlx $tly $newwidth $newheight<br/>";
-	return $new;
+/**
+ * Crop an image
+ * 
+ * @param resource $image of type gd
+ * @param array $area top left and bottom right coordinates
+ * @return resource cropped image of type GD
+ */
+function crop($image, $area) {
+	$newwidth = $area['brx'] - $area['tlx'];
+	$newheight = $area['bry'] - $area['tly'];
+	$cropped = imagecreatetruecolor($newwidth, $newheight);
+	imagepalettecopy($cropped, $image);
+	imagecopyresized($cropped, $image, 0, 0, $area['tlx'], $area['tly'], $newwidth, $newheight, $newwidth, $newheight);
+	return $cropped;
 }
 
 /**
