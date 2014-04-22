@@ -259,7 +259,7 @@ class Barcode {
 	 * @param int $length length of barcode
 	 * @return string the found barcode or false
 	 */
-	public static function read($image, $step = 1, $length = BARCODE_LENGTH) {
+	public static function read($image, $step = 1, $length = BARCODE_LENGTH_PID) {
 		if (function_exists('imagefilter') &&
 			function_exists('imagetruecolortopalette') &&
 			function_exists('imagecolorset') &&
@@ -309,5 +309,5 @@ class Barcode {
 
 function barcode($image, $step = 1, $length = false) {
 	$params = func_get_args();
-	call_user_func_array('Barcode::read', $params);
+	return call_user_func_array('Barcode::read', $params);
 }
