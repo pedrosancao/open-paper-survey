@@ -168,6 +168,25 @@ class Image {
 	private static function sanitizeCoordinates(&$coordinates, $image) {
 		$width = imagesx($image);
 		$height = imagesy($image);
+		if (array_key_exists('width', $coordinates) && array_key_exists('height', $coordinates)) {
+			$rawScale[0] = $width / $coordinates['width'];
+			$rawScale[1] = $height / $coordinates['height'];
+			foreach ($coordinates as $name => $coordinate) {
+				if (strtoupper($name) === $name) {
+					$keyScale = array_search(substr($name, -1), array('X', 'Y'));
+					if ($keyScale === false) {
+						if ($name === 'VERT_WIDTH') {
+							$keyScale = 0;
+						} elseif ($name === 'HORI_WIDTH') {
+							$keyScale = 1;
+						}
+					}
+					if ($keyScale !== false) {
+						$coordinates[$name] = intval($coordinate * $rawScale[$keyScale]);
+					}
+				}
+			}
+		}
 		$tb = array('t', 'b');
 		$lr = array('l', 'r');
 		$vh = array('vert', 'hori');
