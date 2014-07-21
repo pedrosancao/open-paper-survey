@@ -73,7 +73,7 @@ class Barcode {
 		sort($widths);
 		return array(
 			'n' => $widths[round($elements / 4) + 1],
-			'w' => $widths[$elements - round($elements / 4) + 1],
+			'w' => $widths[$elements - round($elements / 4)],
 		);
 	}
 
