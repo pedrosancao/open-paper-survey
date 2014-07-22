@@ -73,7 +73,7 @@ class Barcode {
 		sort($widths);
 		return array(
 			'n' => $widths[round($elements / 4) + 1],
-			'w' => $widths[$elements - round($elements / 4)],
+			'w' => $widths[min($elements - round($elements / 4), $elements - 1)],
 		);
 	}
 
@@ -104,19 +104,13 @@ class Barcode {
 				$string .= "W";
 			}
 			else {
-				$string .= "J"; //J for junk
+				$string .= "J"; // J for junk
 			}
 		}
 
-		//remove junk bits from start and end of string
-		$firstJ = strpos($string, 'J');
-		if ($firstJ <= ((strlen($string) / 4))) {
-			$string = substr($string, $firstJ + 1);
-		}
-
-		$lastJ = strpos($string, 'J', ((strlen($string) / 4) * 3));
-		if ($lastJ >= ((strlen($string) / 4) * 3)) {
-			$string = substr($string, 0, $lastJ);
+		// remove junk bits from start and end of string
+		if (strpos($string, 'J') !== false) {
+			$string = trim($string, 'J');
 		}
 
 		return $string;
@@ -260,6 +254,16 @@ class Barcode {
 	 * @return string the found barcode or false
 	 */
 	public static function read($image, $step = 1, $length = BARCODE_LENGTH_PID) {
+		$targetWidth = 1240;
+		$width = imagesx($image);
+		$height = imagesy($image);
+		if ($width < $targetWidth * 0.7) {
+			$targetHeight = round($height * ($targetWidth / $width));
+			$newImage = imagecreatetruecolor($targetWidth, $targetHeight);
+			imagecopyresampled($newImage, $image, 0, 0, 0, 0, $targetWidth, $targetHeight, $width, $height);
+			imagedestroy($image);
+			$image = $newImage;
+		}
 		if (function_exists('imagefilter') &&
 			function_exists('imagetruecolortopalette') &&
 			function_exists('imagecolorset') &&
@@ -275,14 +279,12 @@ class Barcode {
 			imagecolorset($image, imagecolorclosest($image, 255, 255, 255), 255, 255, 255);
 		}
 
-		$height = imagesy($image);
-
 		for ($y = $step; $y < $height - $step; $y += $step) {
 			$widths = self::getBarWidths($image, $y);
 			$barWidth = self::getNarrowWideWidth($widths);
 			if ($barWidth['n'] != 0 && $barWidth['w'] != 0) {
 				$bars = self::widthsToNarrowWide($widths, $barWidth['n'], $barWidth['w']);
-				if(self::validateI25($bars, $image, $y)) {
+				if(self::validateI25($bars)) {
 					$code = self::getCodeI25($bars);
 					if ($code != "false" && (!$length || strlen($code) == $length)) {
 						return $code;
