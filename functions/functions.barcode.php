@@ -62,18 +62,28 @@ class Barcode {
 	 * @return array An array containg the width of narrow and wide bars
 	 */
 	private static function getNarrowWideWidth(array $widths) {
+		array_shift($widths); // discart first long space
 		$elements = count($widths);
-		if ($elements < 4) {
-			return array(
-				'n' => 0,
-				'w' => 0,
-			);
+		if ($elements < 17) { // min length I2/5
+			return false;
 		}
 
 		sort($widths);
+		$bar = $space = array();
+		foreach ($widths as $key => $value) {
+			if ($key % 2) {
+				array_push($space, $value);
+			} else {
+				array_push($bar, $value);
+			}
+		}
+		$bars = count($bar);
+		$spaces = count($space);
 		return array(
-			'n' => $widths[round($elements / 4) + 1],
-			'w' => $widths[min($elements - round($elements / 4), $elements - 1)],
+			'nb' => $bar[round($bars * 0.3)],
+			'wb' => $bar[min(round($bars * 0.8), $bars - 1)],
+			'ns' => $space[round($spaces * 0.3)],
+			'ws' => $space[min(round($spaces * 0.8), $spaces - 1)],
 		);
 	}
 
@@ -81,26 +91,32 @@ class Barcode {
 	 * Get the narrow/wide representation as string
 	 * 
 	 * @param array $widths An array of bars widths
-	 * @param int $narrow An estimate width of narrow bars
-	 * @param int $wide An estimate width of wide bars
+	 * @param int $narrowBar An estimate width of narrow bars
+	 * @param int $wideBar An estimate width of wide bars
+	 * @param int $narrowSpace An estimate width of narrow spaces
+	 * @param int $wideSpace An estimate width of wide spaces
 	 * @return string narrow/wide representation
 	 */
-	private static function widthsToNarrowWide(array $widths, $narrow, $wide) {
-		//give a large tolerance
-
-		$tolerance = (($wide - $narrow) - 1) / 2;
+	private static function widthsToNarrowWide(array $widths, $narrowBar, $wideBar, $narrowSpace, $wideSpace) {
 		$string = '';
-
-		$nmin = ($narrow - $tolerance);
-		if ($nmin <= 0) {
-			$nmin = 1;
+		$keys = array('b', 's');
+		$narrow = array_combine($keys, array($narrowBar, $narrowSpace));
+		$wide = array_combine($keys, array($wideBar, $wideSpace));
+		$distance = $nmin = $nmax = $wmin = $wmax = array();
+		foreach ($keys as $key) {
+			$distance[$key] = ($wide[$key] - $narrow[$key] - 1);
+			$nmin[$key] = max($narrow[$key] - ceil($distance[$key] * 0.55), 1);
+			$nmax[$key] = $narrow[$key] + floor($distance[$key] * 0.45);
+			$wmin[$key] = $wide[$key] - ceil($distance[$key] * 0.55);
+			$wmax[$key] = $wide[$key] + ceil($distance[$key] * 0.5);
 		}
 
-		foreach($widths as $width) {
-			if (($width >= ($nmin)) && ($width <= ($narrow + $tolerance))) {
+		foreach($widths as $i => $width) {
+			$key = $keys[1 - $i % 2];
+			if ($nmin[$key] <= $width && $width <= $nmax[$key]) {
 				$string .= "N";
 			}
-			elseif (($width >= ($wide - $tolerance)) && ($width <= ($wide + $tolerance))) {
+			elseif ($wmin[$key] <= $width && $width <= $wmax[$key]) {
 				$string .= "W";
 			}
 			else {
@@ -282,8 +298,8 @@ class Barcode {
 		for ($y = $step; $y < $height - $step; $y += $step) {
 			$widths = self::getBarWidths($image, $y);
 			$barWidth = self::getNarrowWideWidth($widths);
-			if ($barWidth['n'] != 0 && $barWidth['w'] != 0) {
-				$bars = self::widthsToNarrowWide($widths, $barWidth['n'], $barWidth['w']);
+			if (!empty($barWidth)) {
+				$bars = self::widthsToNarrowWide($widths, $barWidth['nb'], $barWidth['wb'], $barWidth['ns'], $barWidth['ws']);
 				if(self::validateI25($bars)) {
 					$code = self::getCodeI25($bars);
 					if ($code != "false" && (!$length || strlen($code) == $length)) {
