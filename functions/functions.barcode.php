@@ -285,6 +285,8 @@ class Barcode {
 			function_exists('imagecolorset') &&
 			function_exists('imagecolorclosest'))
 		{
+			// add contrast to reduce noise
+			imagefilter($image, IMG_FILTER_CONTRAST, 30);
 			// Gaussian blur to fill in holes from dithering
 			imagefilter($image, IMG_FILTER_GAUSSIAN_BLUR);
 			// force two colors; dithering = FALSE

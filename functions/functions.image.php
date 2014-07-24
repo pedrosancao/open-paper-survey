@@ -161,6 +161,7 @@ class Image {
 
 	/**
 	 * Sanitize the coordinates of all the detection areas so it fits within the page
+	 * by appling scale
 	 * 
 	 * @param array $coordinates An array containing the 4 corner lines detection areas coordinates
 	 * @param resource $image image of type GD
