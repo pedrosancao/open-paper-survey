@@ -163,7 +163,7 @@ class Barcode {
 	 * @param string $bars narrow/wide representation of barcode
 	 * @return string the value of code of 'false' on failure
 	 */
-	private static function getCodeI25($bars) {
+	private static function getCodeI25($bars, $widths) {
 		$conversionTable = array(
 			'NNWWN' => 0,
 			'WNNNW' => 1,
@@ -180,15 +180,49 @@ class Barcode {
 		$code = '';
 		// ignore the first 4 and last 3
 		for ($i = 4; $i < strlen($bars) - 3; $i += 10) {
-			$b1 = $bars[$i] . $bars[$i + 2] . $bars[$i + 4] . $bars[$i + 6] . $bars[$i + 8];
-			$b2 = $bars[$i + 1] . $bars[$i + 3] . $bars[$i + 5] . $bars[$i + 7] . $bars[$i + 9];
-			if (!isset($conversionTable[$b1]) || !isset($conversionTable[$b2])) {
+			$black = $white = '';
+			$blackWidths = $whiteWidths = array();
+			for ($j = 0; $j < 10; $j++) {
+				if ($j & 0b1) { // odd $j
+					$white .= $bars[$i + $j];
+					array_push($whiteWidths, $widths[$i + $j]);
+				} else { // even $j
+					$black .= $bars[$i + $j];
+					array_push($blackWidths, $widths[$i + $j]);
+				}
+			}
+			$success = true;
+			if (!isset($conversionTable[$black]) && !self::errorCorrectionI25($blackWidths, $black)) {
+				$success = false;
+			} elseif (!isset($conversionTable[$white]) && !self::errorCorrectionI25($whiteWidths, $white)) {
+				$success = false;
+			}
+			if (!$success) {
 				return 'false';
 			}
-			$code .= $conversionTable[$b1] . $conversionTable[$b2];
+			$code .= $conversionTable[$black] . $conversionTable[$white];
 		}
 
 		return $code;
+	}
+
+	private static function errorCorrectionI25($widths, &$bars) {
+		if (strpos($bars, 'J') !== false) {
+			$widthsCopy = $widths;
+			sort($widthsCopy);
+			if ($widthsCopy[3] - $widthsCopy[2] > 1) {
+				$bars = '';
+				foreach ($widths as $width) {
+					if ($width >= $widthsCopy[3]) {
+						$bars .= 'W';
+					} elseif ($width <= $widthsCopy[2]) {
+						$bars .= 'N';
+					}
+				}
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/**
@@ -303,7 +337,7 @@ class Barcode {
 			if (!empty($barWidth)) {
 				$bars = self::widthsToNarrowWide($widths, $barWidth['nb'], $barWidth['wb'], $barWidth['ns'], $barWidth['ws']);
 				if(self::validateI25($bars)) {
-					$code = self::getCodeI25($bars);
+					$code = self::getCodeI25($bars, $widths);
 					if ($code != "false" && (!$length || strlen($code) == $length)) {
 						return $code;
 					}
