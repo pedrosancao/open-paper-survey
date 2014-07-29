@@ -185,10 +185,10 @@ class Barcode {
 			for ($j = 0; $j < 10; $j++) {
 				if ($j & 0b1) { // odd $j
 					$white .= $bars[$i + $j];
-					array_push($whiteWidths, $widths[$i + $j]);
+					array_push($whiteWidths, $widths[$i + $j + 1]);
 				} else { // even $j
 					$black .= $bars[$i + $j];
-					array_push($blackWidths, $widths[$i + $j]);
+					array_push($blackWidths, $widths[$i + $j + 1]);
 				}
 			}
 			$success = true;
@@ -206,21 +206,27 @@ class Barcode {
 		return $code;
 	}
 
+	/**
+	 * Tries to find a valid Interlaced 2 of 5 digit on the supplied widths array
+	 * if the diference between the 4th and 3th greater is more than 1
+	 * 
+	 * @param array $widths array of widths (length must be 5)
+	 * @param string $bars the original narrow/wide digit to be overwrite
+	 * @return boolean error successfully corrected
+	 */
 	private static function errorCorrectionI25($widths, &$bars) {
-		if (strpos($bars, 'J') !== false) {
-			$widthsCopy = $widths;
-			sort($widthsCopy);
-			if ($widthsCopy[3] - $widthsCopy[2] > 1) {
-				$bars = '';
-				foreach ($widths as $width) {
-					if ($width >= $widthsCopy[3]) {
-						$bars .= 'W';
-					} elseif ($width <= $widthsCopy[2]) {
-						$bars .= 'N';
-					}
+		$widthsCopy = $widths;
+		sort($widthsCopy);
+		if ($widthsCopy[3] - $widthsCopy[2] > 1) {
+			$bars = '';
+			foreach ($widths as $width) {
+				if ($width >= $widthsCopy[3]) {
+					$bars .= 'W';
+				} elseif ($width <= $widthsCopy[2]) {
+					$bars .= 'N';
 				}
-				return true;
 			}
+			return true;
 		}
 		return false;
 	}
